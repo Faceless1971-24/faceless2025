@@ -17,8 +17,12 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
+        if(!$user){
+           return redirect()->route('login');
+
+        }
         $primaryRole = optional($user->roles()->wherePivot('is_primary', 1)->first())->slug;
-        $isSuperuser = $user->is_superuser;
+$isSuperuser = $user->is_superuser;
 
         $campaignQuery = Campaign::where('status', 'publish')
             ->where(function ($query) use ($user, $primaryRole, $isSuperuser) {
