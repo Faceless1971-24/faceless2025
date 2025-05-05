@@ -21,6 +21,7 @@ class HomeController extends Controller
            return redirect()->route('login');
 
         }
+        
         $primaryRole = optional($user->roles()->wherePivot('is_primary', 1)->first())->slug;
         $isSuperuser = $user->is_superuser;
 
