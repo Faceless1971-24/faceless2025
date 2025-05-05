@@ -1,0 +1,26 @@
+.profile-icon {
+    padding: 6px;
+    background: #30c78d;
+    border-radius: 100%;
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+    margin: 0 auto !important;
+}
+
+
+.profile-icon-md {
+    padding: 10px;
+    background: #30c78d;
+    border-radius: 100%;
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+    margin: 0 auto !important;
+}
