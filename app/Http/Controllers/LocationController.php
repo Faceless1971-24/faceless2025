@@ -43,10 +43,9 @@ class LocationController extends Controller
         $upazilaIdsArray = explode(',', $upazilaIds);
 
         $unions = Union::whereIn('upazilla_id', $upazilaIdsArray)
-            ->select('id', 'bn_name')
-            ->get()
             ->pluck('bn_name', 'id')
             ->toArray();
+
 
         return response()->json($unions);
     }

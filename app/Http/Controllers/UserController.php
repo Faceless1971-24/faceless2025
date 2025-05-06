@@ -292,6 +292,7 @@ class UserController extends Controller
         }
 
         $users->get();
+        // $users = User::all();
 
 
         $result = DataTables::of($users)
@@ -614,7 +615,7 @@ public function showMemberRequest($id)
     $user = User::with(['division', 'district', 'upazila', 'union'])
         ->findOrFail($id);
     
-    return view('admin.users.member-request-details', compact('user'));
+    return view('users.show', compact('user'));
 }
 
 /**
