@@ -24,7 +24,7 @@ class CampaignController extends Controller
         $query = Campaign::query()->where('status', 'publish');
 
         // Check for higher-level roles like admin or superadmin
-        $isAdmin = $user->is_superuser || $user->hasRole('admin') || $user->hasRole('central');
+        $isAdmin = $user->is_superuser;
         
         // Location-based visibility logic (for lower-level users)
         if (!$isAdmin) {
