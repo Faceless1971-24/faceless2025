@@ -29,11 +29,6 @@ use App\Services\UpdateClockOut;
 
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Frontend Authentication Routes
-|--------------------------------------------------------------------------
-*/
 
 // Frontend authentication routes
 Route::middleware('guest')->group(function () {
@@ -47,11 +42,6 @@ Route::post('/logout', [FrontendLoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-/*
-|--------------------------------------------------------------------------
-| Admin Authentication Routes
-|--------------------------------------------------------------------------
-*/
 
 // Admin authentication routes
 Route::prefix('admin')->group(function () {
@@ -70,15 +60,6 @@ Route::post('/password/change', [PasswordChangeController::class, 'update'])->na
 
 });
 
-/*
-|--------------------------------------------------------------------------
-| Frontend Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register frontend routes for your application.
-| These routes will be accessible to all users, both guests and authenticated.
-|
-*/
 
 // Public routes (accessible without login)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -122,15 +103,6 @@ Route::middleware(['auth:web'])->group(function () {
 
 });
 
-/*
-|--------------------------------------------------------------------------
-| Admin/Backend Routes
-|--------------------------------------------------------------------------
-|
-| These routes require authentication and will access the admin panel
-| functionality of the application.
-|
-*/
 
 // Admin routes - add a prefix to keep them separate from frontend
 // Use the auth.admin middleware to ensure only admin users can access
