@@ -418,7 +418,7 @@
             <!-- Modern Hero Section -->
             <div class="bd-hero bd-fade-up">
                 <div class="bd-container">
-                    <h1 class="display-1">বাংলাদেশ উন্নয়ন অভিযান</h1>
+                    <h1 class="display-1">বাংলাদেশ উন্নয়ন</h1>
                     <p class="lead">সামাজিক পরিবর্তন এবং জাতীয় উন্নয়নের জন্য আমাদের অবিরাম প্রচেষ্টা</p>
 
                     <!-- Quick Access Buttons -->
