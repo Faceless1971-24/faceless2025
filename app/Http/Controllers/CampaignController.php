@@ -167,21 +167,74 @@ class CampaignController extends Controller
             $this->attachCampaignLocations($campaign, $request);
         }
 
-        // Handle file uploads for images, audio, video, and documents
+        // Handle campaign images
         if ($request->hasFile('campaign_images')) {
-            $this->uploadCampaignImages($campaign, $request);
+            foreach ($request->file('campaign_images') as $image) {
+                $path = $image->store('campaigns/images', 'public');
+
+                CampaignImage::create([
+                    'campaign_id' => $campaign->id,
+                    'file_path' => $path,
+                    'file_name' => $image->getClientOriginalName(),
+                    'file_type' => $image->getMimeType(),
+                    'file_size' => $image->getSize(),
+                ]);
+            }
         }
 
+        // Handle campaign audio
         if ($request->hasFile('campaign_audio')) {
-            $this->uploadCampaignAudio($campaign, $request);
+            // Delete existing audio file if it exists
+            if ($campaign->audio) {
+                Storage::disk('public')->delete($campaign->audio->file_path);
+                $campaign->audio->delete();
+            }
+
+            $audio = $request->file('campaign_audio');
+            $path = $audio->store('campaigns/audio', 'public');
+
+            CampaignAudio::create([
+                'campaign_id' => $campaign->id,
+                'file_path' => $path,
+                'file_name' => $audio->getClientOriginalName(),
+                'file_type' => $audio->getMimeType(),
+                'file_size' => $audio->getSize(),
+            ]);
         }
 
+        // Handle campaign video
         if ($request->hasFile('campaign_video')) {
-            $this->uploadCampaignVideo($campaign, $request);
+            // Delete existing video file if it exists
+            if ($campaign->video) {
+                Storage::disk('public')->delete($campaign->video->file_path);
+                $campaign->video->delete();
+            }
+
+            $video = $request->file('campaign_video');
+            $path = $video->store('campaigns/videos', 'public');
+
+            CampaignVideo::create([
+                'campaign_id' => $campaign->id,
+                'file_path' => $path,
+                'file_name' => $video->getClientOriginalName(),
+                'file_type' => $video->getMimeType(),
+                'file_size' => $video->getSize(),
+            ]);
         }
 
+        // Handle campaign files/documents
         if ($request->hasFile('file_paths')) {
-            $this->uploadCampaignFiles($campaign, $request);
+            foreach ($request->file('file_paths') as $file) {
+                $path = $file->store('campaigns/files', 'public');
+
+                CampaignFile::create([
+                    'campaign_id' => $campaign->id,
+                    'file_path' => $path,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_type' => $file->getMimeType(),
+                    'file_size' => $file->getSize(),
+                ]);
+            }
         }
 
         // Attach campaign analytics
@@ -212,109 +265,8 @@ class CampaignController extends Controller
         }
     }
 
-    private function uploadCampaignImages($campaign, $request)
-    {
-        foreach ($request->file('campaign_images') as $image) {
-            $path = $image->store('campaign_images', 'public');
-            $campaign->images()->create(['path' => $path]);
-        }
-    }
-
-    private function uploadCampaignAudio($campaign, $request)
-    {
-        $audio = $request->file('campaign_audio');
-        $path = $audio->store('campaign_audio', 'public');
-        $campaign->audio()->create(['path' => $path]);
-    }
-
-    private function uploadCampaignVideo($campaign, $request)
-    {
-        $video = $request->file('campaign_video');
-        $path = $video->store('campaign_video', 'public');
-        $campaign->video()->create(['path' => $path]);
-    }
-
-    private function uploadCampaignFiles($campaign, $request)
-    {
-        foreach ($request->file('file_paths') as $file) {
-            $path = $file->store('campaign_files', 'public');
-            $campaign->files()->create(['path' => $path]);
-        }
-    }
 
 
-
-    /**
-     * Attach campaign locations based on campaign type
-     */
-
-
-    /**
-     * Handle campaign media and file uploads
-     */
-    private function handleCampaignMedia(Campaign $campaign, Request $request)
-    {
-        // Handle campaign images
-        if ($request->hasFile('campaign_images')) {
-            foreach ($request->file('campaign_images') as $image) {
-                $path = $image->store('campaigns/images', 'public');
-
-                CampaignImage::create([
-                    'campaign_id' => $campaign->id,
-                    'file_path' => $path,
-                    'file_name' => $image->getClientOriginalName(),
-                    'file_type' => $image->getMimeType(),
-                    'file_size' => $image->getSize(),
-                ]);
-            }
-        }
-
-        // Handle campaign audio
-        if ($request->hasFile('campaign_audio')) {
-            $audio = $request->file('campaign_audio');
-            $path = $audio->store('campaigns/audio', 'public');
-
-            CampaignAudio::create([
-                'campaign_id' => $campaign->id,
-                'file_path' => $path,
-                'file_name' => $audio->getClientOriginalName(),
-                'file_type' => $audio->getMimeType(),
-                'file_size' => $audio->getSize(),
-            ]);
-        }
-
-        // Handle campaign video
-        if ($request->hasFile('campaign_video')) {
-            $video = $request->file('campaign_video');
-            $path = $video->store('campaigns/videos', 'public');
-
-            CampaignVideo::create([
-                'campaign_id' => $campaign->id,
-                'file_path' => $path,
-                'file_name' => $video->getClientOriginalName(),
-                'file_type' => $video->getMimeType(),
-                'file_size' => $video->getSize(),
-            ]);
-        }
-
-        // Handle campaign files/documents
-        if ($request->hasFile('file_paths')) {
-            foreach ($request->file('file_paths') as $file) {
-                $path = $file->store('campaigns/files', 'public');
-
-                CampaignFile::create([
-                    'campaign_id' => $campaign->id,
-                    'file_path' => $path,
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_type' => $file->getMimeType(),
-                    'file_size' => $file->getSize(),
-                ]);
-            }
-        }
-    }
-    /**
-     * Display the specified campaign.
-     */
     public function show(Campaign $campaign)
     {
         $campaign->load([
