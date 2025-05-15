@@ -82,21 +82,8 @@
             }
 
             /* Button Styling */
-            .dataTables_paginate {
-                margin-top: 20px;
-                text-align: right;
-            }
 
-            .dataTables_paginate .paginate_button {
-                background-color: #007bff;
-                color: white;
-                border: 1px solid #007bff;
-                padding: 8px 14px;
-                margin: 0 5px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.875rem;
-            }
+
 
             .dataTables_paginate .paginate_button:hover {
                 background-color: #0056b3;

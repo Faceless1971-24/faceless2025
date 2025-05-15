@@ -7,7 +7,11 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Models\Designation;
 use App\Services\FileUploadService;
 use App\Models\District;
+use App\Services\MemberRequestService;
+
 use App\Models\Role;
+use App\Services\UserAccessService;
+
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -66,35 +70,28 @@ class UserController extends Controller
         $data = $request->validated();
         $authUser = auth()->user();
 
-        // 🔍 Get the authenticated user's primary role's slug
         $authPrimaryRole = optional(
             $authUser->roles()->wherePivot('is_primary', 1)->first()
         )->slug;
 
-        // 🔐 Check if the user is a superuser (god mode) or has elevated role
         $isSuperUser = $authUser->is_superuser == 1;
         $hasFullAccess = $isSuperUser || in_array($authPrimaryRole, ['admin', 'central']);
 
-        // Get the slug of the role being assigned to the new user
         $newUserRoleSlug = optional(Role::find($request->user_type_id))->slug;
 
-        // 🚦 Role hierarchy: low to high
         $roleOrder = ['union', 'upazila', 'district', 'division', 'central', 'admin'];
 
         $authRoleLevel = array_search($authPrimaryRole, $roleOrder);
         $newRoleLevel = array_search($newUserRoleSlug, $roleOrder);
 
-        // ❌ Bail on unknown roles unless user is a superuser
         if (!$isSuperUser && ($authRoleLevel === false || $newRoleLevel === false)) {
             return back()->withError('Invalid role assignment.')->withInput();
         }
 
-        // ❌ Prevent assigning a higher-level role (unless full access)
         if (!$hasFullAccess && $newRoleLevel > $authRoleLevel) {
             return back()->withError('You cannot assign a higher-level role.')->withInput();
         }
 
-        // 🔒 Enforce location restriction unless full access
         if (!$hasFullAccess) {
             if ($authPrimaryRole === 'division' && $request->division_id != $authUser->division_id) {
                 return back()->withError('Invalid division assignment.')->withInput();
@@ -125,7 +122,6 @@ class UserController extends Controller
             }
         }
 
-        // ✅ Proceed with user creation
         $data['password'] = Hash::make(env('USER_DEFAULT_PASSWORD'));
 
         try {
@@ -145,7 +141,6 @@ class UserController extends Controller
 
 
 
-            // 👤 Create the user
             $user = User::create($data);
 
             // 🔖 Assign role
@@ -239,6 +234,7 @@ class UserController extends Controller
         }
     }
 
+
     public function getUsers()
     {
         // Permissions
@@ -249,51 +245,9 @@ class UserController extends Controller
 
         $status = request()->has('is_active') ? request()->is_active : 1;
 
-        $authUser = auth()->user();
-        $authPrimaryRole = optional(
-            $authUser->roles()->wherePivot('is_primary', 1)->first()
-        )->slug;
-
-        $isSuperuser = $authUser->is_superuser;
-
-        // Roles in hierarchical order
-        $hierarchy = ['union', 'upazila', 'district', 'division'];
-        $currentLevelIndex = array_search($authPrimaryRole, $hierarchy);
-        $allowedRoles = array_slice($hierarchy, 0, $currentLevelIndex + 1);
-
-        // Base query
-        $users = User::query()
-            ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
-            ->when(request()->has('is_active'), fn($q) => $q->where('is_active', request()->is_active))
-            ->when(
-                in_array($authPrimaryRole, $hierarchy),
-                function ($q) use ($authUser, $authPrimaryRole) {
-                    return $q->where($authPrimaryRole . '_id', $authUser->{$authPrimaryRole . '_id'});
-                }
-            )
-            ->when(
-                in_array($authPrimaryRole, $hierarchy),
-                function ($q) use ($allowedRoles) {
-                    $q->whereHas('roles', function ($roleQuery) use ($allowedRoles) {
-                        $roleQuery->whereIn('roles.slug', $allowedRoles)
-                                ->where('role_user.is_primary', 1);
-                    });
-                }
-            );
-
-        // 🧨 Override filtering for Superuser, Admin, Central
-        if ($isSuperuser || in_array($authPrimaryRole, ['admin', 'central'])) {
-            $users = User::query()
-                ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
-                ->when(request()->has('is_active'), fn($q) => $q->where('is_active', request()->is_active))
-                ->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)]);
-        } else {
-            $users = $users->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)]);
-        }
-
-        $users->get();
-        // $users = User::all();
-
+        // Get users via service, pass $status (active filter)
+        $userAccessService = app(UserAccessService::class);
+        $users = $userAccessService->getAccessibleUsers($status);
 
         $result = DataTables::of($users)
             ->addIndexColumn()
@@ -306,70 +260,45 @@ class UserController extends Controller
             })
             ->editColumn('name', function ($row) {
                 return '<p class="font-w600 mb-0">
-                            <a href="' . route('users.show', ['user' => $row->id]) . '">' . mb_substr($row->name, 0) . '</a>
-                        </p>
-                        <small class="text-muted mb-0">#' . $row->userid . '</small>';
+                        <a href="' . route('users.show', ['user' => $row->id]) . '">' . e($row->name) . '</a>
+                    </p>
+                    <small class="text-muted mb-0">#' . e($row->userid) . '</small>';
             })
             ->addColumn('user_type', function ($row) {
-                return $row->roles->count() ? $row->roles[0]->title : '-';
+                return $row->roles->count() ? e($row->roles[0]->title) : '-';
             })
             ->editColumn('last_login', function ($row) {
                 return $row->last_login ? $row->last_login->format('d M Y h:i a') : '-';
             })
             ->addColumn('status', function ($row) {
-                return $row->status;
+                return $row->is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>';
             })
             ->addColumn('action', function ($row) use ($canView, $canEdit, $canActivation, $canPasswordReset) {
                 $btn = '';
                 if ($canView) {
-                    $btn .= '<a href="' . route('users.show', ['user' => $row->id]) . '"
-        style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #3498db; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-        onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-        onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-        title="View"><i class="fa fa-fw fa-eye"></i></a>';
+                    $btn .= '<a href="' . route('users.show', ['user' => $row->id]) . '" class="btn btn-sm btn-primary" title="View"><i class="fa fa-fw fa-eye"></i></a> ';
                 }
-
                 if ($canEdit) {
-                    $btn .= '<a href="' . route('users.edit', ['user' => $row->id]) . '"
-        style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #2ecc71; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-        onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-        onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-        title="Edit"><i class="fa fa-fw fa-pen"></i></a>';
+                    $btn .= '<a href="' . route('users.edit', ['user' => $row->id]) . '" class="btn btn-sm btn-success" title="Edit"><i class="fa fa-fw fa-pen"></i></a> ';
                 }
-
                 if ($canActivation) {
                     if ($row->is_active) {
-                        $btn .= '<a href="' . route('users.deactivate', ['user' => $row->id]) . '"
-            onClick="return confirmDeactivate()"
-            style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #e74c3c; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-            onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-            onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-            title="Deactivate"><i class="fa fa-fw fa-user-lock"></i></a>';
+                        $btn .= '<a href="' . route('users.deactivate', ['user' => $row->id]) . '" onclick="return confirm(\'Are you sure to deactivate this user?\')" class="btn btn-sm btn-danger" title="Deactivate"><i class="fa fa-fw fa-user-lock"></i></a> ';
                     } else {
-                        $btn .= '<a href="' . route('users.activate', ['user' => $row->id]) . '"
-            onClick="return confirmActivate()"
-            style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #2ecc71; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-            onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-            onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-            title="Activate"><i class="fa fa-fw fa-user-check"></i></a>';
+                        $btn .= '<a href="' . route('users.activate', ['user' => $row->id]) . '" onclick="return confirm(\'Are you sure to activate this user?\')" class="btn btn-sm btn-success" title="Activate"><i class="fa fa-fw fa-user-check"></i></a> ';
                     }
                 }
-
                 if ($canPasswordReset) {
-                    $btn .= '<a href="' . route('users.password-reset', ['user' => $row->id]) . '"
-        onClick="return confirmPasswordReset()"
-        style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; border-radius: 0.375rem; background-color: #f39c12; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-        onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-        onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-        title="Password Reset"><i class="fa fa-fw fa-fingerprint"></i></a>';
+                    $btn .= '<a href="' . route('users.password-reset', ['user' => $row->id]) . '" onclick="return confirm(\'Are you sure to reset the password?\')" class="btn btn-sm btn-warning" title="Password Reset"><i class="fa fa-fw fa-fingerprint"></i></a>';
                 }
-
-                return '<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end;">' . $btn . '</div>';
+                return $btn;
             })
             ->rawColumns(['action', 'name', 'photo', 'status'])
             ->make(true);
+
         return $result;
     }
+
 
     public function passwordReset(User $user)
     {
@@ -487,129 +416,107 @@ public function memberRequests()
  *
  * @return \Illuminate\Http\JsonResponse
  */
-public function getMemberRequests()
-{
-    // Permissions
-    $canApprove = auth()->user()->can('user-update');
-    $canReject = auth()->user()->can('user-password-reset');
-    $canView = auth()->user()->can('user-view');
 
-    $status = request()->has('status') ? request()->status : 'pending';
+    public function getMemberRequests(MemberRequestService $memberRequestService)
+    {
+        // Permissions
+        $canApprove = auth()->user()->can('user-update');
+        $canReject = auth()->user()->can('user-password-reset');
+        $canView = auth()->user()->can('user-view');
 
-    $authUser = auth()->user();
-    $userRole = optional($authUser->roles()->wherePivot('is_primary', 1)->first())->slug;
-    
-    $requests = User::query()
-        ->select(['id', 'name', 'userid', 'phone', 'photo', 'created_at', 'status', 'division_id', 'district_id', 'upazila_id', 'union_id'])
-        ->with([
-            'division:id,bn_name',
-            'district:id,bn_name',
-            'upazila:id,bn_name',
-            'union:id,bn_name',
-        ])
-        ->when($status !== 'all', function ($q) use ($status) {
-            return $q->where('status', $status);
-        })
-        // Checking the role and filtering based on it
-        ->when($userRole === 'division', function ($q) use ($authUser) {
-            return $q->where('division_id', $authUser->division_id);
-        })
-        ->when($userRole === 'district', function ($q) use ($authUser) {
-            return $q->where('district_id', $authUser->district_id);
-        })
-        ->when($userRole === 'upazila', function ($q) use ($authUser) {
-            return $q->where('upazila_id', $authUser->upazila_id);
-        })
-        ->when($userRole === 'union', function ($q) use ($authUser) {
-            return $q->where('union_id', $authUser->union_id);
-        });
-    
-    $result = DataTables::of($requests)
-        ->addIndexColumn()
-        ->editColumn('photo', function ($row) {
-            if ($row->photo) {
-                return "<img src='{$row->photo_path}' class='img-avatar img-avatar48' alt='User Photo' />";
-            }
-            $firstChar = mb_substr($row->name, 0, 1, "UTF-8");
-            return "<p class='profile-icon bg-info'>{$firstChar}</p>";
-        })
-        ->editColumn('name', function ($row) {
-            return '<p class="font-w600 mb-0">
+        $status = request()->has('status') ? request()->status : 'pending';
+
+        // Use service to get filtered query based on role and status
+        $requests = $memberRequestService->getMemberRequestsByRole($status);
+
+        $result = DataTables::of($requests)
+            ->addIndexColumn()
+            ->editColumn('photo', function ($row) {
+                if ($row->photo) {
+                    return "<img src='{$row->photo_path}' class='img-avatar img-avatar48' alt='User Photo' />";
+                }
+                $firstChar = mb_substr($row->name, 0, 1, "UTF-8");
+                return "<p class='profile-icon bg-info'>{$firstChar}</p>";
+            })
+            ->editColumn('name', function ($row) {
+                return '<p class="font-w600 mb-0">
                     <a href="' . route('users.showMemberRequest', $row->id) . '">' . mb_substr($row->name, 0) . '</a>
                 </p>
                 <small class="text-muted mb-0">#' . $row->userid . '</small>';
-        })
-        ->addColumn('location', function ($row) {
-            $location = [];
-            if ($row->division) $location[] = $row->division->bn_name;
-            if ($row->district) $location[] = $row->district->bn_name;
-            if ($row->upazila) $location[] = $row->upazila->bn_name;
-            if ($row->union) $location[] = $row->union->bn_name;
-            
-            return implode(', ', $location);
-        })
-        ->editColumn('created_at', function ($row) {
-            return $row->created_at ? $row->created_at->format('d M Y') : '-';
-        })
-        ->editColumn('status', function ($row) {
-            $statusClass = [
-                'pending' => 'warning',
-                'approved' => 'success',
-                'rejected' => 'danger'
-            ];
-            
-            $statusText = [
-                'pending' => 'বিচারাধীন',
-                'approved' => 'অনুমোদিত',
-                'rejected' => 'প্রত্যাখ্যাত'
-            ];
-            
-            $class = $statusClass[$row->membership_status] ?? 'secondary';
-            $text = $statusText[$row->membership_status] ?? 'অজানা';
-            
-            return "<span class='badge badge-{$class}'>{$text}</span>";
-        })
-        ->addColumn('action', function ($row)  {
-            $btn = '';
+            })
+            ->addColumn('location', function ($row) {
+                $location = [];
+                if ($row->division)
+                    $location[] = $row->division->bn_name;
+                if ($row->district)
+                    $location[] = $row->district->bn_name;
+                if ($row->upazila)
+                    $location[] = $row->upazila->bn_name;
+                if ($row->union)
+                    $location[] = $row->union->bn_name;
+
+                return implode(', ', $location);
+            })
+            ->editColumn('created_at', function ($row) {
+                return $row->created_at ? $row->created_at->format('d M Y') : '-';
+            })
+            ->editColumn('status', function ($row) {
+                $statusClass = [
+                    'pending' => 'warning',
+                    'approved' => 'success',
+                    'rejected' => 'danger'
+                ];
+
+                $statusText = [
+                    'pending' => 'বিচারাধীন',
+                    'approved' => 'অনুমোদিত',
+                    'rejected' => 'প্রত্যাখ্যাত'
+                ];
+
+                $class = $statusClass[$row->membership_status] ?? 'secondary';
+                $text = $statusText[$row->membership_status] ?? 'অজানা';
+
+                return "<span class='badge badge-{$class}'>{$text}</span>";
+            })
+            ->addColumn('action', function ($row) {
+                $btn = '';
                 $btn .= '<a href="' . route('users.show', $row->id) . '"
-    style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #3498db; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-    onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-    onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-    title="বিস্তারিত দেখুন"><i class="fa fa-fw fa-eye"></i></a>';
+                style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #3498db; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
+                onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
+                title="বিস্তারিত দেখুন"><i class="fa fa-fw fa-eye"></i></a>';
 
-            if ( $row->membership_status === 'pending') {
-                $btn .= '<a href="' . route('users.approveMemberRequest', $row->id) . '"
-    onClick="return confirmApprove()"
-    style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #2ecc71; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-    onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-    onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-    title="অনুমোদন করুন"><i class="fa fa-fw fa-check"></i></a>';
-            }
+                if ($row->membership_status === 'pending') {
+                    $btn .= '<a href="' . route('users.approveMemberRequest', $row->id) . '"
+                    onClick="return confirmApprove()"
+                    style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; margin-right: 0.5rem; border-radius: 0.375rem; background-color: #2ecc71; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                    onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
+                    onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
+                    title="অনুমোদন করুন"><i class="fa fa-fw fa-check"></i></a>';
 
-            if ( $row->membership_status === 'pending') {
-                $btn .= '<button type="button"
-    class="reject-btn"
-    data-id="' . $row->id . '"
-    style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; border-radius: 0.375rem; background-color: #e74c3c; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-    onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
-    onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
-    title="প্রত্যাখ্যান করুন"><i class="fa fa-fw fa-times"></i></button>';
-            }
+                    $btn .= '<button type="button"
+                    class="reject-btn"
+                    data-id="' . $row->id . '"
+                    style="display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; border-radius: 0.375rem; background-color: #e74c3c; color: white; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                    onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\'; this.style.opacity=\'0.9\';"
+                    onmouseout="this.style.transform=\'\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.1)\'; this.style.opacity=\'1\';"
+                    title="প্রত্যাখ্যান করুন"><i class="fa fa-fw fa-times"></i></button>';
+                }
 
-            return '<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end;">' . $btn . '</div>';
-        })
-        ->rawColumns(['action', 'name', 'photo', 'status'])
-        ->make(true);
-    
-    return $result;
-}
+                return '<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end;">' . $btn . '</div>';
+            })
+            ->rawColumns(['action', 'name', 'photo', 'status'])
+            ->make(true);
 
-/**
- * Display the member request details
- *
- * @param int $id
- * @return \Illuminate\Http\Response
- */
+        return $result;
+    }
+
+    /**
+     * Display the member request details
+     *
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
 public function showMemberRequest($id)
 {
     $user = User::with(['division', 'district', 'upazila', 'union'])

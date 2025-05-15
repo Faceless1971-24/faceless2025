@@ -55,7 +55,7 @@
                     ['data' => 'userid', 'name' => 'users.userid', 'visible' => false, 'sortable' => false],
                     ['data' => 'photo', 'name' => 'photo', 'searchable' => false, 'sortable' => false, 'className' => 'text-center'],
                     ['data' => 'name', 'name' => 'users.name'],
-                    ['data' => 'user_type', 'name' => 'user_type', 'th' => 'Member Type', 'sortable' => false],
+                    ['data' => 'user_type', 'name' => 'user_type', 'th' => 'Member Type', 'sortable' => true],
                     ['data' => 'status', 'name' => 'users.is_active'],
                     ['data' => 'last_login', 'name' => 'users.last_login', 'th' => 'Last Login', 'searchable' => false],
                     ['data' => 'action', 'name' => 'action', 'searchable' => false, 'sortable' => false]
