@@ -34,8 +34,7 @@ class CampaignController extends Controller
 
         $query = Campaign::with(['images', 'analytics', 'creator']);
 
-        // 🔓 If superuser or admin/central, skip location filters
-        if (!$isSuperuser && !in_array($primaryRole, ['admin', 'central'])) {
+        if (!$isSuperuser && !in_array($primaryRole, ['admin', 'central-admin'])) {
             $query->where(function ($q) use ($user) {
                 $q->where('is_nationwide', true)
                     ->orWhere(function ($q2) use ($user) {

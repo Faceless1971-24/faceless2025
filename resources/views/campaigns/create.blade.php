@@ -261,7 +261,7 @@
                                         <label for="title">ক্যাম্পেইন শিরোনাম <span
                                                 class="required-asterisk">*</span></label>
                                         <input type="text" class="form-control" id="title" name="title" required
-                                            placeholder="ক্যাম্পেইনের শিরোনাম লিখুন">
+                                            placeholder="ক্যাম্পেইনের শিরোনাম লিখুন" value="{{ old('title') }}">
                                     </div>
                                 </div>
                             </div>
@@ -271,8 +271,8 @@
                                     <div class="form-group">
                                         <label for="description">ক্যাম্পেইন বিবরণ <span
                                                 class="required-asterisk">*</span></label>
-                                        <textarea id="summernoteAddCampaign" class="form-control" name="description"
-                                            required></textarea>
+                                        <textarea id="summernoteAddCampaign" class="form-control" name="description">{{ old('description') }}</textarea>
+
                                     </div>
                                 </div>
                             </div>
@@ -391,7 +391,7 @@
                                 </div>
                             </div>
 
-                            
+
                         </div>
 
                         <div class="custom-form-section">
@@ -565,26 +565,26 @@
             });
 
             $(document).ready(function () {
-                // Initialize Summernote with improved configuration
-                $('#summernoteAddCampaign').summernote({
-                    height: 300,
-                    toolbar: [
-                        ['style', ['style']],
-                        ['font', ['bold', 'underline', 'clear']],
-                        ['color', ['color']],
-                        ['para', ['ul', 'ol', 'paragraph']],
-                        ['table', ['table']],
-                        ['insert', ['link']],
-                        ['view', ['fullscreen', 'codeview', 'help']]
-                    ],
-                    // Ensure the textarea remains visible
-                    callbacks: {
-                        onInit: function () {
-                            $(this).summernote('code', ''); // Clear any pre-existing content
-                            $(this).show(); // Ensure the textarea is visible
+                    $('#summernoteAddCampaign').summernote({
+                        height: 300,
+                        toolbar: [
+                            ['style', ['style']],
+                            ['font', ['bold', 'underline', 'clear']],
+                            ['color', ['color']],
+                            ['para', ['ul', 'ol', 'paragraph']],
+                            ['table', ['table']],
+                            ['insert', ['link']],
+                            ['view', ['fullscreen', 'codeview', 'help']]
+                        ],
+                        callbacks: {
+                            onInit: function () {
+                                // Set the editor content from the textarea (which has old input)
+                                const content = $('#summernoteAddCampaign').val();
+                                $(this).summernote('code', content);
+                            }
                         }
-                    }
-                });
+                    });
+
 
                 // Add custom validation for Summernote
                 $('#addCampaignForm').on('submit', function (e) {
@@ -772,89 +772,109 @@
                 }
             });
 
-            // Form validation before submission
-            $('#addCampaignForm').on('submit', function (e) {
-                const campaignType = $('#campaign_type').val();
-                const isNationwide = $('#is_nationwide').val() === '1';
-                const divisionIds = $('#division_ids').val() || [];
-                const districtIds = $('#district_ids').val() || [];
-                const upazilaIds = $('#upazila_ids').val() || [];
-                const unionIds = $('#union_ids').val() || [];
-                const startDate = $('#start_date').val();
-                const endDate = $('#end_date').val();
 
-                // Basic form validation
-                if (!$('#title').val().trim()) {
-                    e.preventDefault();
-                    alert('ক্যাম্পেইন শিরোনাম দিন');
-                    return false;
-                }
+        $('#addCampaignForm').on('submit', function (e) {
+        const $submitBtn = $(this).find('button[type="submit"], input[type="submit"]');
+        $submitBtn.prop('disabled', true); // disable immediately on submit to prevent double submit
 
-                if (!$('#summernoteAddCampaign').val().trim()) {
-                    e.preventDefault();
-                    alert('ক্যাম্পেইন বিবরণ দিন');
-                    return false;
-                }
+        const campaignType = $('#campaign_type').val();
+        const isNationwide = $('#is_nationwide').val() === '1';
+        const divisionIds = $('#division_ids').val() || [];
+        const districtIds = $('#district_ids').val() || [];
+        const upazilaIds = $('#upazila_ids').val() || [];
+        const unionIds = $('#union_ids').val() || [];
+        const startDate = $('#start_date').val();
+        const endDate = $('#end_date').val();
 
-                // Campaign type validation
-                if (!campaignType) {
-                    e.preventDefault();
-                    alert('অনুগ্রহ করে ক্যাম্পেইনের ধরন নির্বাচন করুন');
-                    return false;
-                }
+        function enableSubmit() {
+            $submitBtn.prop('disabled', false);
+        }
 
-                // Location validation based on campaign type
-                if (!isNationwide) {
-                    if (campaignType === 'division' && divisionIds.length === 0) {
-                        e.preventDefault();
-                        alert('অনুগ্রহ করে কমপক্ষে একটি বিভাগ নির্বাচন করুন');
-                        return false;
-                    } else if (campaignType === 'district' && districtIds.length === 0) {
-                        e.preventDefault();
-                        alert('অনুগ্রহ করে কমপক্ষে একটি জেলা নির্বাচন করুন');
-                        return false;
-                    } else if (campaignType === 'upazila' && upazilaIds.length === 0) {
-                        e.preventDefault();
-                        alert('অনুগ্রহ করে কমপক্ষে একটি উপজেলা নির্বাচন করুন');
-                        return false;
-                    } else if (campaignType === 'union' && unionIds.length === 0) {
-                        e.preventDefault();
-                        alert('অনুগ্রহ করে কমপক্ষে একটি ইউনিয়ন নির্বাচন করুন');
-                        return false;
-                    }
-                }
+        // Basic form validation
+        if (!$('#title').val().trim()) {
+            e.preventDefault();
+            alert('ক্যাম্পেইন শিরোনাম দিন');
+            enableSubmit();
+            return false;
+        }
 
-                // Date validation
-                if (!startDate) {
-                    e.preventDefault();
-                    alert('শুরুর তারিখ নির্বাচন করুন');
-                    return false;
-                }
+        if (!$('#summernoteAddCampaign').val().trim()) {
+            e.preventDefault();
+            alert('ক্যাম্পেইন বিবরণ দিন');
+            enableSubmit();
+            return false;
+        }
 
-                if (!endDate) {
-                    e.preventDefault();
-                    alert('শেষের তারিখ নির্বাচন করুন');
-                    return false;
-                }
+        // Campaign type validation
+        if (!campaignType) {
+            e.preventDefault();
+            alert('অনুগ্রহ করে ক্যাম্পেইনের ধরন নির্বাচন করুন');
+            enableSubmit();
+            return false;
+        }
 
-                // Compare dates
-                const startDateParts = startDate.split('/');
-                const endDateParts = endDate.split('/');
+        // Location validation based on campaign type
+        if (!isNationwide) {
+            if (campaignType === 'division' && divisionIds.length === 0) {
+                e.preventDefault();
+                alert('অনুগ্রহ করে কমপক্ষে একটি বিভাগ নির্বাচন করুন');
+                enableSubmit();
+                return false;
+            } else if (campaignType === 'district' && districtIds.length === 0) {
+                e.preventDefault();
+                alert('অনুগ্রহ করে কমপক্ষে একটি জেলা নির্বাচন করুন');
+                enableSubmit();
+                return false;
+            } else if (campaignType === 'upazila' && upazilaIds.length === 0) {
+                e.preventDefault();
+                alert('অনুগ্রহ করে কমপক্ষে একটি উপজেলা নির্বাচন করুন');
+                enableSubmit();
+                return false;
+            } else if (campaignType === 'union' && unionIds.length === 0) {
+                e.preventDefault();
+                alert('অনুগ্রহ করে কমপক্ষে একটি ইউনিয়ন নির্বাচন করুন');
+                enableSubmit();
+                return false;
+            }
+        }
 
-                const startDateObj = new Date(startDateParts[2], startDateParts[1] - 1, startDateParts[0]);
-                const endDateObj = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[0]);
+        // Date validation
+        if (!startDate) {
+            e.preventDefault();
+            alert('শুরুর তারিখ নির্বাচন করুন');
+            enableSubmit();
+            return false;
+        }
 
-                if (startDateObj > endDateObj) {
-                    e.preventDefault();
-                    alert('শেষের তারিখ শুরুর তারিখের পরে হতে হবে');
-                    return false;
-                }
+        if (!endDate) {
+            e.preventDefault();
+            alert('শেষের তারিখ নির্বাচন করুন');
+            enableSubmit();
+            return false;
+        }
 
-                return true;
-            });
+        // Compare dates
+        const startDateParts = startDate.split('/');
+        const endDateParts = endDate.split('/');
 
-            // Enable tooltips
-            $('[data-toggle="tooltip"]').tooltip();
+        const startDateObj = new Date(startDateParts[2], startDateParts[1] - 1, startDateParts[0]);
+        const endDateObj = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[0]);
+
+        if (startDateObj > endDateObj) {
+            e.preventDefault();
+            alert('শেষের তারিখ শুরুর তারিখের পরে হতে হবে');
+            enableSubmit();
+            return false;
+        }
+
+        // If we reach here, validation passed, form submits normally
+        // Submit button stays disabled to avoid double submit
+        return true;
+    });
+
+
+
         });
+
     </script>
 @endpush
