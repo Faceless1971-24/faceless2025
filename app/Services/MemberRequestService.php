@@ -18,41 +18,46 @@ class MemberRequestService
         $userRole = optional($authUser->roles()->wherePivot('is_primary', 1)->first())->slug;
 
         $query = User::query()
-            ->select(['id', 'name', 'userid', 'phone', 'photo', 'created_at', 'status', 'division_id', 'district_id', 'upazila_id', 'union_id'])
+            ->select([
+                'id',
+                'name',
+                'userid',
+                'phone',
+                'photo',
+                'created_at',
+                'status',
+                'division_id',
+                'district_id',
+                'upazila_id',
+                'union_id'
+            ])
             ->with([
                 'division:id,bn_name',
                 'district:id,bn_name',
                 'upazila:id,bn_name',
                 'union:id,bn_name',
-            ]);
+            ])->where('is_admin', 0);
 
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
-        // No location filtering for global admins
         if (in_array($userRole, ['admin', 'central-admin'])) {
+            // Global admins, no location filter
             return $query;
         }
 
-        // Filter by role and location
-        switch ($userRole) {
-            case 'division-admin':
-                $query->where('division_id', $authUser->division_id);
-                break;
-            case 'district-admin':
-                $query->where('district_id', $authUser->district_id);
-                break;
-            case 'upazila-admin':
-                $query->where('upazila_id', $authUser->upazila_id);
-                break;
-            case 'union-admin':
-                $query->where('union_id', $authUser->union_id);
-                break;
-            // optionally add default for other roles or no filtering
+        if ($userRole === 'division-admin') {
+            $query->where('division_id', $authUser->division_id);
+        } elseif ($userRole === 'district-admin') {
+            $query->where('district_id', $authUser->district_id);
+        } elseif ($userRole === 'upazila-admin') {
+            $query->where('upazila_id', $authUser->upazila_id);
+        } elseif ($userRole === 'union-admin') {
+            $query->where('union_id', $authUser->union_id);
         }
+        // else: no filtering for other roles or add default case if needed
 
         return $query;
     }
-
 }

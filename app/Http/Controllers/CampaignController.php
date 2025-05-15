@@ -26,69 +26,67 @@ class CampaignController extends Controller
     /**
      * Display a listing of the campaigns.
      */
-    public function index(Request $request)
-    {
-        $user = auth()->user();
-        $primaryRole = optional($user->roles()->wherePivot('is_primary', 1)->first())->slug;
-        $isSuperuser = $user->is_superuser;
+public function index(Request $request)
+{
+    $user = auth()->user();
+    $primaryRole = optional($user->roles()->wherePivot('is_primary', 1)->first())->slug;
+    $isSuperuser = $user->is_superuser;
 
-        $query = Campaign::with(['images', 'analytics', 'creator']);
+    $query = Campaign::with(['images', 'analytics', 'creator']);
 
-        if (!$isSuperuser && !in_array($primaryRole, ['admin', 'central-admin'])) {
-            $query->where(function ($q) use ($user) {
-                $q->where('is_nationwide', true)
-                    ->orWhere(function ($q2) use ($user) {
-                        $q2->whereHas('unions', function ($uq) use ($user) {
-                            $uq->where('unions.id', $user->union_id);
-                        });
-                    })
-                    ->orWhere(function ($q2) use ($user) {
-                        $q2->whereHas('upazilas', function ($uq) use ($user) {
-                            $uq->where('upazilas.id', $user->upazila_id);
-                        })->whereDoesntHave('unions');
-                    })
-                    ->orWhere(function ($q2) use ($user) {
-                        $q2->whereHas('districts', function ($dq) use ($user) {
-                            $dq->where('districts.id', $user->district_id);
-                        })->whereDoesntHave('upazilas')->whereDoesntHave('unions');
-                    })
-                    ->orWhere(function ($q2) use ($user) {
-                        $q2->whereHas('divisions', function ($dq) use ($user) {
-                            $dq->where('divisions.id', $user->division_id);
-                        })->whereDoesntHave('districts')->whereDoesntHave('upazilas')->whereDoesntHave('unions');
-                    });
-            });
-        }
+    if (!$isSuperuser && !in_array($primaryRole, ['admin', 'central-admin'])) {
+        $query->where(function ($q) use ($user, $primaryRole) {
+            // ✅ Nationwide campaigns are always visible
+            $q->where('is_nationwide', true);
 
-        // 🧃 Optional filters
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+            // ✅ Dynamically add location-based visibility
+            $locationScopes = [
+                'division-admin' => ['relation' => 'divisions', 'column' => 'divisions.id', 'value' => $user->division_id],
+                'district-admin' => ['relation' => 'districts', 'column' => 'districts.id', 'value' => $user->district_id],
+                'upazila-admin' => ['relation' => 'upazilas', 'column' => 'upazilas.id', 'value' => $user->upazila_id],
+                'union-admin' => ['relation' => 'unions', 'column' => 'unions.id', 'value' => $user->union_id],
+            ];
 
-        if ($request->filled('campaign_type')) {
-            if ($request->campaign_type === 'nationwide') {
-                $query->where('is_nationwide', true);
-            } else {
-                $query->where('campaign_type', $request->campaign_type);
+            if (isset($locationScopes[$primaryRole])) {
+                $scope = $locationScopes[$primaryRole];
+
+                $q->orWhereHas($scope['relation'], function ($subQuery) use ($scope) {
+                    $subQuery->where($scope['column'], $scope['value']);
+                });
             }
-        }
-
-        if ($request->filled('featured')) {
-            $query->where('featured', $request->featured == '1');
-        }
-
-        if ($request->filled('search')) {
-            $search = '%' . $request->search . '%';
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', $search)
-                    ->orWhere('description', 'like', $search);
-            });
-        }
-
-        $campaigns = $query->latest()->paginate(9);
-
-        return view('campaigns.index', compact('campaigns'));
+        });
     }
+
+    // 🎯 Optional filters
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->filled('campaign_type')) {
+        if ($request->campaign_type === 'nationwide') {
+            $query->where('is_nationwide', true);
+        } else {
+            $query->where('campaign_type', $request->campaign_type);
+        }
+    }
+
+    if ($request->filled('featured')) {
+        $query->where('featured', $request->featured == '1');
+    }
+
+    if ($request->filled('search')) {
+        $search = '%' . $request->search . '%';
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', $search)
+              ->orWhere('description', 'like', $search);
+        });
+    }
+
+    $campaigns = $query->latest()->paginate(9);
+
+    return view('campaigns.index', compact('campaigns'));
+}
+
 
     /**
      * Show the form for creating a new campaign.
@@ -146,6 +144,58 @@ class CampaignController extends Controller
                 ->withInput()
                 ->with('error', 'Invalid date format. Please use dd/mm/yyyy format.');
         }
+
+$authUser = auth()->user();
+$primaryRole = optional($authUser->roles()->wherePivot('is_primary', 1)->first())->slug;
+$isSuperuser = $authUser->is_superuser;
+
+// Full access roles
+if (!$isSuperuser && !in_array($primaryRole, ['admin', 'central-admin'])) {
+
+    $roleAllowedType = match ($primaryRole) {
+        'division-admin' => 'division',
+        'district-admin' => 'district',
+        'upazila-admin' => 'upazila',
+        'union-admin' => 'union',
+        default => null,
+    };
+
+    if (!$roleAllowedType) {
+        return back()->withInput()->with('error', 'আপনার এই ক্যাম্পেইন তৈরি করার অনুমতি নেই।');
+    }
+
+    // Enforce role-level hierarchy
+    $hierarchy = ['union', 'upazila', 'district', 'division'];
+    $roleLevel = array_search($roleAllowedType, $hierarchy);
+    $campaignLevel = array_search($validated['campaign_type'], $hierarchy);
+
+    if ($campaignLevel > $roleLevel) {
+        return back()->withInput()->with('error', 'আপনি উচ্চ স্তরের ক্যাম্পেইন তৈরি করতে পারবেন না।');
+    }
+
+    // Location field & requested IDs
+    $locationField = $validated['campaign_type'] . '_ids';
+    $requestLocationIds = $request->input($locationField, []);
+
+    if (empty($requestLocationIds)) {
+        return back()->withInput()->with('error', 'অনুগ্রহ করে আপনার এলাকার জন্য সঠিক লোকেশন নির্বাচন করুন।');
+    }
+
+    // Get user's location ID
+    $userLocationIdField = $roleAllowedType . '_id';
+    $userLocationId = $authUser->{$userLocationIdField};
+
+    if (!$userLocationId) {
+        return back()->withInput()->with('error', 'আপনার এলাকাভুক্ত তথ্য পাওয়া যায়নি।');
+    }
+
+    // Final strict check: Only allow own location
+    if (count($requestLocationIds) !== 1 || !in_array($userLocationId, $requestLocationIds)) {
+        return back()->withInput()->with('error', 'শুধুমাত্র আপনার নিজস্ব এলাকার জন্য ক্যাম্পেইন করতে পারবেন।');
+    }
+}
+
+
 
         // Create the Campaign
         $campaign = Campaign::create([
@@ -389,6 +439,57 @@ class CampaignController extends Controller
         DB::beginTransaction();
 
         try {
+
+$authUser = auth()->user();
+$primaryRole = optional($authUser->roles()->wherePivot('is_primary', 1)->first())->slug;
+$isSuperuser = $authUser->is_superuser;
+
+// Full access roles
+if (!$isSuperuser && !in_array($primaryRole, ['admin', 'central-admin'])) {
+
+    $roleAllowedType = match ($primaryRole) {
+        'division-admin' => 'division',
+        'district-admin' => 'district',
+        'upazila-admin' => 'upazila',
+        'union-admin' => 'union',
+        default => null,
+    };
+
+    if (!$roleAllowedType) {
+        return back()->withInput()->with('error', 'আপনার এই ক্যাম্পেইন তৈরি করার অনুমতি নেই।');
+    }
+
+    // Enforce role-level hierarchy
+    $hierarchy = ['union', 'upazila', 'district', 'division'];
+    $roleLevel = array_search($roleAllowedType, $hierarchy);
+    $campaignLevel = array_search($validated['campaign_type'], $hierarchy);
+
+    if ($campaignLevel > $roleLevel) {
+        return back()->withInput()->with('error', 'আপনি উচ্চ স্তরের ক্যাম্পেইন তৈরি করতে পারবেন না।');
+    }
+
+    // Location field & requested IDs
+    $locationField = $validated['campaign_type'] . '_ids';
+    $requestLocationIds = $request->input($locationField, []);
+
+    if (empty($requestLocationIds)) {
+        return back()->withInput()->with('error', 'অনুগ্রহ করে আপনার এলাকার জন্য সঠিক লোকেশন নির্বাচন করুন।');
+    }
+
+    // Get user's location ID
+    $userLocationIdField = $roleAllowedType . '_id';
+    $userLocationId = $authUser->{$userLocationIdField};
+
+    if (!$userLocationId) {
+        return back()->withInput()->with('error', 'আপনার এলাকাভুক্ত তথ্য পাওয়া যায়নি।');
+    }
+
+    // Final strict check: Only allow own location
+    if (count($requestLocationIds) !== 1 || !in_array($userLocationId, $requestLocationIds)) {
+        return back()->withInput()->with('error', 'শুধুমাত্র আপনার নিজস্ব এলাকার জন্য ক্যাম্পেইন করতে পারবেন।');
+    }
+}
+
             // Update the campaign
             $campaign->update([
                 'title' => $request->title,
@@ -656,35 +757,38 @@ class CampaignController extends Controller
     /**
      * Delete a campaign media item
      */
-    public function deleteMedia(Request $request)
-    {
-        $request->validate([
-            'type' => 'required|in:image,audio,video,file',
-            'id' => 'required|integer'
-        ]);
+public function deleteMedia(Request $request)
+{
+    $request->validate([
+        'type' => 'required|in:image,audio,video,file',
+        'id' => 'required|integer'
+    ]);
 
-        try {
-            if ($request->type === 'image') {
-                $media = CampaignImage::findOrFail($request->id);
-            } elseif ($request->type === 'audio') {
-                $media = CampaignAudio::findOrFail($request->id);
-            } elseif ($request->type === 'video') {
-                $media = CampaignVideo::findOrFail($request->id);
-            } else {
-                $media = CampaignFile::findOrFail($request->id);
-            }
+    try {
+        $media = match ($request->type) {
+            'image' => CampaignImage::findOrFail($request->id),
+            'audio' => CampaignAudio::findOrFail($request->id),
+            'video' => CampaignVideo::findOrFail($request->id),
+            'file'  => CampaignFile::findOrFail($request->id),
+        };
 
-            // Delete the file from storage
+        // Delete file if exists physically
+        if ($media->file_path && Storage::disk('public')->exists($media->file_path)) {
             Storage::disk('public')->delete($media->file_path);
-
-            // Delete the record
-            $media->delete();
-
-            return response()->json(['success' => true, 'message' => 'মিডিয়া সফলভাবে মুছে ফেলা হয়েছে!']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'মিডিয়া মুছতে সমস্যা হয়েছে!'], 500);
         }
+
+        // Delete DB record (even if file gone)
+        $media->delete();
+
+        return response()->json(['success' => true, 'message' => 'মিডিয়া সফলভাবে মুছে ফেলা হয়েছে!']);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json(['success' => false, 'message' => 'মিডিয়া পাওয়া যায়নি!'], 404);
+    } catch (\Exception $e) {
+        \Log::error('Media delete error: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'মিডিয়া মুছতে সমস্যা হয়েছে!'], 500);
     }
+}
+
 
     /**
      * Display campaigns by location

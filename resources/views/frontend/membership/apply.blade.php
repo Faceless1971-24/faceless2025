@@ -129,16 +129,6 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="userid" class="form-label required-field">ইউজার আইডি</label>
-                                <input type="text" class="form-control @error('userid') is-invalid @enderror"
-                                    id="userid" name="userid" value="{{ old('userid') }}" required>
-                                <small class="form-text text-muted">এটি আপনার অনন্য ইউজার আইডি হবে (সর্বোচ্চ ৩০ অক্ষর)</small>
-                                @error('userid')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
                                 <label for="father_name" class="form-label required-field">পিতার নাম</label>
                                 <input type="text" class="form-control @error('father_name') is-invalid @enderror"
                                     id="father_name" name="father_name" value="{{ old('father_name') }}" required>
@@ -217,14 +207,7 @@
                         </h3>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label required-field">মোবাইল নম্বর</label>
-                                <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone"
-                                    name="phone" value="{{ old('phone', $user->phone ?? '') }}" required>
-                                @error('phone')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+
 
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label required-field">ইমেইল</label>
@@ -312,7 +295,7 @@
                     <!-- Location Information Section -->
                     <div class="form-section" id="location-info">
                         <h3 class="form-section-title">
-                            <i class="fas fa-map-marker-alt me-2"></i> অবস্থান তথ্য
+                            <i class="fas fa-map-marker-alt me-2"></i> আপনার অবস্থান তথ্য
                         </h3>
 
                         <div class="row">
@@ -357,7 +340,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="union_id" class="form-label required-field">ইউনিয়ন</label>
                                 <select class="form-select @error('union_id') is-invalid @enderror" id="union_id"
-                                    name="union_id" required>
+                                    name="union_id" >
                                     <option value="">প্রথমে উপজেলা নির্বাচন করুন</option>
                                 </select>
                                 @error('union_id')
@@ -414,7 +397,7 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="joining_date" class="form-label">যোগদানের তারিখ</label>
+                                <label for="joining_date" class="form-label">দলে যোগদানের তারিখ</label>
                                 <input type="text" class="form-control flatpickr-date @error('joining_date') is-invalid @enderror" 
                                     id="joining_date" name="joining_date" value="{{ old('joining_date') }}">
                                 @error('joining_date')
@@ -422,16 +405,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="duration" class="form-label">মেয়াদ (মাসে)</label>
-                                <input type="number" class="form-control @error('duration') is-invalid @enderror" 
-                                    id="duration" name="duration" value="{{ old('duration') }}">
-                                @error('duration')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
 
-                        
                         </div>
                     </div>
 
@@ -442,49 +416,40 @@
                         </h3>
 
                         <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label for="photo" class="form-label">ছবি (জেপিজি ফরম্যাট, সর্বোচ্চ ২
-                                    এমবি)</label>
-                                <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo"
-                                    name="photo" accept="image/jpeg,image/jpg,image/png">
-                                <div id="photo-preview-container" class="mt-2" style="display: none;">
-                                    <img id="photo-preview" class="preview-image" alt="Photo Preview">
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="photo" class="form-label">ফটো আপলোড</label>
+                                <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo" name="photo">
                                 @error('photo')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <div class="col-md-6 mb-4">
-                                <label for="nid_scan" class="form-label required-field">এনআইডি স্ক্যান (পিডিএফ/জেপিজি,
-                                    সর্বোচ্চ ৫ এমবি)</label>
-                                <input type="file" class="form-control @error('nid_scan') is-invalid @enderror"
-                                    id="nid_scan" name="nid_scan" accept="application/pdf,image/jpeg,image/jpg,image/png"
+
+                            <div class="col-md-6 mb-3">
+                                <label for="nid_scan" class="form-label required-field">NID স্ক্যান</label>
+                                <input type="file" class="form-control @error('nid_scan') is-invalid @enderror" id="nid_scan" name="nid_scan"
                                     required>
-                                <div id="nid-preview-container" class="mt-2" style="display: none;">
-                                    <img id="nid-preview" class="preview-image" alt="NID Preview">
-                                    <p id="pdf-filename" style="display: none;"></p>
-                                </div>
                                 @error('nid_scan')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
                         </div>
                     </div>
 
                     <!-- Terms and Submission -->
                     <div class="form-section" id="terms-submission">
-                        <div class="form-check mb-4">
-                            <input class="form-check-input @error('agreed_to_terms') is-invalid @enderror" type="checkbox"
-                                id="agreed_to_terms" name="agreed_to_terms" required>
-                            <label class="form-check-label" for="agreed_to_terms">
-                                আমি <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">নিয়ম ও শর্তাবলী</a>
-                                পড়েছি এবং সম্মত আছি।
-                            </label>
-                            @error('agreed_to_terms')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input @error('agreed_to_terms') is-invalid @enderror" type="checkbox" id="agreed_to_terms"
+                            name="agreed_to_terms" {{ old('agreed_to_terms') ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agreed_to_terms">
+                            আমি সকল শর্তাবলী মেনে নিচ্ছি
+                        </label>
+                        @error('agreed_to_terms')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
 
                         <button type="submit" class="btn btn-primary btn-lg px-5">
                             <i class="fas fa-paper-plane me-2"></i> আবেদন জমা দিন
@@ -505,7 +470,7 @@
                     <div class="sidebar-step" data-section="contact-info">
                         <span class="step-number">2</span> যোগাযোগের তথ্য
                     </div>
-                    
+
                     <div class="sidebar-step" data-section="emergency-contact">
                         <span class="step-number">3</span> জরুরী যোগাযোগ
                     </div>
@@ -517,7 +482,7 @@
                     <div class="sidebar-step" data-section="education-profession">
                         <span class="step-number">5</span> শিক্ষাগত ও পেশাগত তথ্য
                     </div>
-                    
+
                     <div class="sidebar-step" data-section="membership-info">
                         <span class="step-number">6</span> সদস্যতা তথ্য
                     </div>

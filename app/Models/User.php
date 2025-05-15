@@ -29,9 +29,14 @@ class User extends Authenticatable
         'password',
         'blood_group',
         'address',
+        'permanent_address', // ✅ Add this
         'post_code',
         'phone',
         'photo',
+        'nid_scan', // ✅ Add this
+        'nid', // ✅ Add this
+        'father_name', // ✅ Add this
+        'mother_name', // ✅ Add this
         'union_id',
         'upazila_id',
         'district_id',
@@ -44,17 +49,17 @@ class User extends Authenticatable
         'duration',
         'ending_date',
         'last_educational_qual',
+        'educational_qualification', // ✅ Add this
+        'profession', // ✅ Add this
         'supervisor_id',
         'employment_type',
         'is_active',
         'designation_id',
-        'casual_leave',
-        'sick_leave',
-        'locker_no',
-        // 'user_type_id',
         'status',
+        'is_superuser',
         'is_admin',
     ];
+
 
 
     protected $hidden = [

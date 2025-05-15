@@ -589,10 +589,11 @@
     <script>
         $(document).ready(function () {
             // Initialize Select2
-            $('.js-select2').select2({
-                placeholder: "নির্বাচন করুন",
-                allowClear: true
-            });
+
+$('#division_ids, #district_ids, #upazila_ids, #union_ids').select2({
+    placeholder: 'Select option',
+    width: '100%' // Keep it full width
+});
 
             // Initialize Summernote
             $('#summernoteEditCampaign').summernote({
@@ -650,66 +651,78 @@
                 }
             });
 
-            // Cascading location selection
-            $('#division_ids').change(function () {
-                const divisionIds = $(this).val() || [];
-                const $districtSelect = $('#district_ids');
+            $("#division_ids").change(function () {
+                const divisionId = $(this).val();
+                if (divisionId) {
+                    // Reset and disable lower selects
+                    $("#district_ids").html('<option value="">প্রথমে বিভাগ নির্বাচন করুন</option>').prop("disabled", true);
+                    $("#upazila_ids").html('<option value="">প্রথমে জেলা নির্বাচন করুন</option>').prop("disabled", true);
+                    $("#union_ids").html('<option value="">প্রথমে উপজেলা নির্বাচন করুন</option>').prop("disabled", true);
 
-                // Reset dependent dropdowns
-                $districtSelect.empty();
-                $('#upazila_ids, #union_ids').empty();
-
-                // Fetch districts if divisions are selected
-                if (divisionIds.length > 0) {
-                    $.get('/get-districts/' + divisionIds.join(','), function (data) {
-                        data.forEach(function (district) {
-                            $districtSelect.append(
-                                `<option value="${district.id}">${district.bn_name}</option>`
-                            );
-                        });
-                        $districtSelect.trigger('change');
+                    // Get districts
+                    $.ajax({
+                        url: '/get-districts/' + divisionId,
+                        type: 'GET',
+                        success: function (data) {
+                            let districtOptions = '<option value="">জেলা নির্বাচন করুন</option>';
+                            $.each(data, function (id, bn_name) {
+                                districtOptions += `<option value="${id}">${bn_name}</option>`;
+                            });
+                            $("#district_ids").html(districtOptions).prop("disabled", false);
+                        }
                     });
+                } else {
+                    $("#district_ids").html('<option value="">প্রথমে বিভাগ নির্বাচন করুন</option>').prop("disabled", true);
+                    $("#upazila_ids").html('<option value="">প্রথমে জেলা নির্বাচন করুন</option>').prop("disabled", true);
+                    $("#union_ids").html('<option value="">প্রথমে উপজেলা নির্বাচন করুন</option>').prop("disabled", true);
                 }
             });
 
-            $('#district_ids').change(function () {
-                const districtIds = $(this).val() || [];
-                const $upazilaSelect = $('#upazila_ids');
+            $("#district_ids").change(function () {
+                const districtId = $(this).val();
+                if (districtId) {
+                    // Reset and disable lower selects
+                    $("#upazila_ids").html('<option value="">প্রথমে জেলা নির্বাচন করুন</option>').prop("disabled", true);
+                    $("#union_ids").html('<option value="">প্রথমে উপজেলা নির্বাচন করুন</option>').prop("disabled", true);
 
-                // Reset dependent dropdowns
-                $upazilaSelect.empty();
-                $('#union_ids').empty();
-
-                // Fetch upazilas if districts are selected
-                if (districtIds.length > 0) {
-                    $.get('/get-upazilas/' + districtIds.join(','), function (data) {
-                        data.forEach(function (upazila) {
-                            $upazilaSelect.append(
-                                `<option value="${upazila.id}">${upazila.bn_name}</option>`
-                            );
-                        });
-                        $upazilaSelect.trigger('change');
+                    // Get upazilas
+                    $.ajax({
+                        url: '/get-upazilas/' + districtId,
+                        type: 'GET',
+                        success: function (data) {
+                            let upazilaOptions = '<option value="">উপজেলা নির্বাচন করুন</option>';
+                            $.each(data, function (id, bn_name) {
+                                upazilaOptions += `<option value="${id}">${bn_name}</option>`;
+                            });
+                            $("#upazila_ids").html(upazilaOptions).prop("disabled", false);
+                        }
                     });
+                } else {
+                    $("#upazila_ids").html('<option value="">প্রথমে জেলা নির্বাচন করুন</option>').prop("disabled", true);
+                    $("#union_ids").html('<option value="">প্রথমে উপজেলা নির্বাচন করুন</option>').prop("disabled", true);
                 }
             });
 
-            $('#upazila_ids').change(function () {
-                const upazilaIds = $(this).val() || [];
-                const $unionSelect = $('#union_ids');
+            $("#upazila_ids").change(function () {
+                const upazilaId = $(this).val();
+                if (upazilaId) {
+                    // Reset union select
+                    $("#union_ids").html('<option value="">প্রথমে উপজেলা নির্বাচন করুন</option>').prop("disabled", true);
 
-                // Reset union dropdown
-                $unionSelect.empty();
-
-                // Fetch unions if upazilas are selected
-                if (upazilaIds.length > 0) {
-                    $.get('/get-unions/' + upazilaIds.join(','), function (data) {
-                        data.forEach(function (union) {
-                            $unionSelect.append(
-                                `<option value="${union.id}">${union.bn_name}</option>`
-                            );
-                        });
-                        $unionSelect.trigger('change');
+                    // Get unions
+                    $.ajax({
+                        url: '/get-unions/' + upazilaId,
+                        type: 'GET',
+                        success: function (data) {
+                            let unionOptions = '<option value="">ইউনিয়ন নির্বাচন করুন</option>';
+                            $.each(data, function (id, bn_name) {
+                                unionOptions += `<option value="${id}">${bn_name}</option>`;
+                            });
+                            $("#union_ids").html(unionOptions).prop("disabled", false);
+                        }
                     });
+                } else {
+                    $("#union_ids").html('<option value="">প্রথমে উপজেলা নির্বাচন করুন</option>').prop("disabled", true);
                 }
             });
 
@@ -786,7 +799,7 @@
                 // Send AJAX request to delete the media
                 $.ajax({
                     url: "{{ route('campaigns.delete.media') }}",
-                    type: "POST",
+                    type: "DELETE",
                     data: {
                         _token: "{{ csrf_token() }}",
                         type: deleteMediaType,

@@ -186,6 +186,7 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, User $user)
     {
         $data = $request->validated();
+        // dd($data);
 
         try {
             if (request()->has('photo')) {
@@ -202,6 +203,9 @@ class UserController extends Controller
             }
 
             unset($data['user_type_id']);
+            if ($request->user_type_id) {
+                $data['is_admin'] = 1;
+            }
 
             User::where('id', $user->id)->update($data);
 
@@ -248,6 +252,7 @@ class UserController extends Controller
         // Get users via service, pass $status (active filter)
         $userAccessService = app(UserAccessService::class);
         $users = $userAccessService->getAccessibleUsers($status);
+        
 
         $result = DataTables::of($users)
             ->addIndexColumn()
@@ -262,7 +267,7 @@ class UserController extends Controller
                 return '<p class="font-w600 mb-0">
                         <a href="' . route('users.show', ['user' => $row->id]) . '">' . e($row->name) . '</a>
                     </p>
-                    <small class="text-muted mb-0">#' . e($row->userid) . '</small>';
+                    <small class="text-muted mb-0">#' . e($row->phone) . '</small>';
             })
             ->addColumn('user_type', function ($row) {
                 return $row->roles->count() ? e($row->roles[0]->title) : '-';
@@ -540,6 +545,7 @@ public function approveMemberRequest($id)
     }
     
     $user->status = 'approved';
+        $user->is_active = 1;
     $user->membership_id = 'MEM' . date('Y') . str_pad($user->id, 6, '0', STR_PAD_LEFT);
     $user->save();
     

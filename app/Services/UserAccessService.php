@@ -15,44 +15,56 @@ class UserAccessService
             $authUser->roles()->wherePivot('is_primary', 1)->first()
         )->slug;
 
-        $isSuperuser = $authUser->is_superuser;
-
-        // Define hierarchy using slugs
-        $hierarchy = ['union-admin', 'upazila-admin', 'district-admin', 'division-admin'];
-
-        // Superuser & Central access bypass hierarchy restrictions
-        if ($isSuperuser || in_array($authPrimaryRole, ['admin', 'central-admin'])) {
+        if ($authUser->is_superuser || in_array($authPrimaryRole, ['admin', 'central-admin'])) {
+            // Superuser or central-admin -> see all users
             return User::query()
-                ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
+                ->select(['id', 'name', 'userid','phone', 'photo', 'last_login', 'is_active'])
                 ->when($isActive !== null, fn($q) => $q->where('is_active', $isActive))
                 ->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)])
                 ->get();
         }
 
-        // Find current role level in hierarchy
-        $currentLevelIndex = array_search($authPrimaryRole, $hierarchy);
-
-        if ($currentLevelIndex === false) {
-            // Role not in hierarchy, return empty collection
-            return collect();
+        if ($authPrimaryRole === 'division-admin') {
+            return User::query()
+                ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
+                ->when($isActive !== null, fn($q) => $q->where('is_active', $isActive))
+                ->where('division_id', $authUser->division_id)
+                ->where('is_admin', 0)
+                ->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)])
+                ->get();
         }
 
-        // Get allowed roles up to current level
-        $allowedRoles = array_slice($hierarchy, 0, $currentLevelIndex + 1);
+        if ($authPrimaryRole === 'district-admin') {
+            return User::query()
+                ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
+                ->when($isActive !== null, fn($q) => $q->where('is_active', $isActive))
+                ->where('district_id', $authUser->district_id)
+                ->where('is_admin', 0)
+                ->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)])
+                ->get();
+        }
 
-        // Extract prefix for filtering by location (e.g., 'union' from 'union-admin')
-        $authRolePrefix = explode('-', $authPrimaryRole)[0];
+        if ($authPrimaryRole === 'upazila-admin') {
+            return User::query()
+                ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
+                ->when($isActive !== null, fn($q) => $q->where('is_active', $isActive))
+                ->where('upazila_id', $authUser->upazila_id)
+                ->where('is_admin', 0)
+                ->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)])
+                ->get();
+        }
 
-        // Build query for accessible users
-        return User::query()
-            ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
-            ->when($isActive !== null, fn($q) => $q->where('is_active', $isActive))
-            ->where($authRolePrefix . '_id', $authUser->{$authRolePrefix . '_id'})
-            ->whereHas('roles', fn($roleQuery) =>
-                $roleQuery->whereIn('roles.slug', $allowedRoles)
-                          ->where('role_user.is_primary', 1)
-            )
-            ->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)])
-            ->get();
+        if ($authPrimaryRole === 'union-admin') {
+            return User::query()
+                ->select(['id', 'name', 'userid', 'photo', 'last_login', 'is_active'])
+                ->when($isActive !== null, fn($q) => $q->where('is_active', $isActive))
+                ->where('union_id', $authUser->union_id)
+                ->where('is_admin', 0)
+                ->with(['roles' => fn($q) => $q->wherePivot('is_primary', 1)])
+                ->get();
+        }
+
+        // No matching role? No access.
+        return collect();
     }
 }
