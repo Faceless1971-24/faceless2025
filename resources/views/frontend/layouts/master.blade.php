@@ -239,8 +239,7 @@
                             @endauth
                         <li class="nav-item px-3 py-2 fs-5">
                             <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('membership.index') }}">
-                                <i class="fas fa-user-plus me-1"></i> সদস্যতা
-                            </a>
+                                <i class="fas fa-user-plus me-1"></i> সদস্য                            </a>
                         </li>
                     </ul>
                     
@@ -265,8 +264,7 @@
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="{{ route('membership.index') }}">
-                                            <i class="fa-solid fa-id-card me-2"></i> সদস্যতা
-                                        </a>
+                                            <i class="fa-solid fa-id-card me-2"></i> সদস্য                                        </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     @if(Auth::user()->isAdmin())
