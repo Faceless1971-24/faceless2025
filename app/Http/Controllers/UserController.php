@@ -65,101 +65,85 @@ class UserController extends Controller
         return view('users.create', $this->getFormData());
     }
 
-    public function store(UserPostRequest $request)
-    {
-        $data = $request->validated();
-        $authUser = auth()->user();
+public function store(UserPostRequest $request)
+{
+    $data = $request->validated();
+    $authUser = auth()->user();
 
-        $authPrimaryRole = optional(
-            $authUser->roles()->wherePivot('is_primary', 1)->first()
-        )->slug;
+    $authPrimaryRole = optional(
+        $authUser->roles()->wherePivot('is_primary', 1)->first()
+    )->slug;
 
-        $isSuperUser = $authUser->is_superuser == 1;
-        $hasFullAccess = $isSuperUser || in_array($authPrimaryRole, ['admin', 'central']);
+    $isSuperUser = $authUser->is_superuser == 1;
+    $hasFullAccess = $isSuperUser || in_array($authPrimaryRole, ['admin', 'central-admin']);
 
-        $newUserRoleSlug = optional(Role::find($request->user_type_id))->slug;
+    $newUserRole = optional(Role::find($request->user_type_id));
+    $newUserRoleSlug = $newUserRole->slug ?? null;
 
-        $roleOrder = ['union', 'upazila', 'district', 'division', 'central', 'admin'];
+    $roleHierarchy = ['union-admin', 'upazila-admin', 'district-admin', 'division-admin', 'central-admin', 'admin'];
 
-        $authRoleLevel = array_search($authPrimaryRole, $roleOrder);
-        $newRoleLevel = array_search($newUserRoleSlug, $roleOrder);
+    $authRoleLevel = array_search($authPrimaryRole, $roleHierarchy);
+    $newRoleLevel = array_search($newUserRoleSlug, $roleHierarchy);
 
-        if (!$isSuperUser && ($authRoleLevel === false || $newRoleLevel === false)) {
-            return back()->withError('Invalid role assignment.')->withInput();
-        }
+    // Basic role validity
+    if (!$isSuperUser && ($authRoleLevel === false || $newRoleLevel === false)) {
+        return back()->withError('Invalid role assignment.')->withInput();
+    }
 
-        if (!$hasFullAccess && $newRoleLevel > $authRoleLevel) {
-            return back()->withError('You cannot assign a higher-level role.')->withInput();
-        }
+    // Check can't assign higher role
+    if (!$hasFullAccess && $newRoleLevel > $authRoleLevel) {
+        return back()->withError('You cannot assign a higher-level role.')->withInput();
+    }
 
-        if (!$hasFullAccess) {
-            if ($authPrimaryRole === 'division' && $request->division_id != $authUser->division_id) {
-                return back()->withError('Invalid division assignment.')->withInput();
-            }
+    // Strict location match by role type
+    if (!$hasFullAccess) {
+        $locationErrors = [
+            'division-admin' => fn() => $request->division_id != $authUser->division_id,
+            'district-admin' => fn() => $request->division_id != $authUser->division_id || $request->district_id != $authUser->district_id,
+            'upazila-admin' => fn() => $request->division_id != $authUser->division_id || $request->district_id != $authUser->district_id || $request->upazila_id != $authUser->upazila_id,
+            'union-admin' => fn() => $request->division_id != $authUser->division_id || $request->district_id != $authUser->district_id || $request->upazila_id != $authUser->upazila_id || $request->union_id != $authUser->union_id,
+        ];
 
-            if ($authPrimaryRole === 'district' && (
-                $request->division_id != $authUser->division_id ||
-                $request->district_id != $authUser->district_id
-            )) {
-                return back()->withError('Invalid district assignment.')->withInput();
-            }
-
-            if ($authPrimaryRole === 'upazila' && (
-                $request->division_id != $authUser->division_id ||
-                $request->district_id != $authUser->district_id ||
-                $request->upazila_id != $authUser->upazila_id
-            )) {
-                return back()->withError('Invalid upazila assignment.')->withInput();
-            }
-
-            if ($authPrimaryRole === 'union' && (
-                $request->division_id != $authUser->division_id ||
-                $request->district_id != $authUser->district_id ||
-                $request->upazila_id != $authUser->upazila_id ||
-                $request->union_id != $authUser->union_id
-            )) {
-                return back()->withError('Invalid union assignment.')->withInput();
-            }
-        }
-
-        $data['password'] = Hash::make(env('USER_DEFAULT_PASSWORD'));
-
-        try {
-            $filePath = null;
-            if (request()->has('photo')) {
-                $filePath = $this->fileUploadService->uploadImage('photo', 'users');
-            }
-
-            $data['dob'] = $data['dob'] ? Carbon::parse($data['dob'])->format('Y-m-d') : null;
-            $data['joining_date'] = $data['joining_date'] ? Carbon::parse($data['joining_date'])->format('Y-m-d') : null;
-            $data['photo'] = $filePath;
-
-            DB::beginTransaction();
-
-            $data['is_admin'] = 1;
-            $data['status'] = 'approved';
-
-
-
-            $user = User::create($data);
-
-            // 🔖 Assign role
-            DB::table('role_user')->insert([
-                'user_id' => $user->id,
-                'role_id' => $request->user_type_id,
-                'is_primary' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            DB::commit();
-
-            return redirect()->route('users.index')->withSuccess('Employee created successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withError($e->getMessage())->withInput($request->all());
+        if (isset($locationErrors[$authPrimaryRole]) && $locationErrors[$authPrimaryRole]()) {
+            return back()->withError('Invalid location assignment as per your role.')->withInput();
         }
     }
+
+    // Proceed to create user
+    $data['password'] = Hash::make(env('USER_DEFAULT_PASSWORD'));
+
+    try {
+        $filePath = null;
+        if (request()->has('photo')) {
+            $filePath = $this->fileUploadService->uploadImage('photo', 'users');
+        }
+
+        $data['dob'] = $data['dob'] ? Carbon::parse($data['dob'])->format('Y-m-d') : null;
+        $data['joining_date'] = $data['joining_date'] ? Carbon::parse($data['joining_date'])->format('Y-m-d') : null;
+        $data['photo'] = $filePath;
+        $data['is_admin'] = 1;
+        $data['status'] = 'approved';
+
+        DB::beginTransaction();
+
+        $user = User::create($data);
+
+        DB::table('role_user')->insert([
+            'user_id' => $user->id,
+            'role_id' => $request->user_type_id,
+            'is_primary' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::commit();
+
+        return redirect()->route('users.index')->withSuccess('Employee created successfully');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withError($e->getMessage())->withInput();
+    }
+}
 
 
 
@@ -183,47 +167,77 @@ class UserController extends Controller
     }
 
 
-    public function update(UserUpdateRequest $request, User $user)
-    {
-        $data = $request->validated();
-        // dd($data);
+public function update(UserUpdateRequest $request, User $user)
+{
+    $data = $request->validated();
+    $authUser = auth()->user();
 
-        try {
-            if (request()->has('photo')) {
-                $filePath = $this->fileUploadService->uploadImage('photo', 'users');
-                $data['photo'] = $filePath;
-            }
+    $authPrimaryRole = optional($authUser->roles()->wherePivot('is_primary', 1)->first())->slug;
+    $isSuperUser = $authUser->is_superuser == 1;
+    $hasFullAccess = $isSuperUser || in_array($authPrimaryRole, ['admin', 'central-admin']);
 
-            $data['dob'] = $data['dob'] ? Carbon::parse($data['dob'])->format('Y-m-d') : null;
+    $newUserRole = optional(Role::find($request->user_type_id));
+    $newUserRoleSlug = $newUserRole->slug ?? null;
 
-            if (isset($data['joining_date'])) {
-                $data['joining_date'] = $data['joining_date']
-                    ? Carbon::parse($data['joining_date'])->format('Y-m-d')
-                    : null;
-            }
+    $roleHierarchy = ['union-admin', 'upazila-admin', 'district-admin', 'division-admin', 'central-admin', 'admin'];
 
-            unset($data['user_type_id']);
-            if ($request->user_type_id) {
-                $data['is_admin'] = 1;
-            }
+    $authRoleLevel = array_search($authPrimaryRole, $roleHierarchy);
+    $newRoleLevel = array_search($newUserRoleSlug, $roleHierarchy);
 
-            User::where('id', $user->id)->update($data);
+    // Basic role validity
+    if (!$isSuperUser && ($authRoleLevel === false || $newRoleLevel === false)) {
+        return back()->withError('Invalid role assignment.')->withInput();
+    }
 
-            DB::table('role_user')->where('user_id', $user->id)->delete();
+    // Check can't assign higher role
+    if (!$hasFullAccess && $newRoleLevel > $authRoleLevel) {
+        return back()->withError('You cannot assign a higher-level role.')->withInput();
+    }
 
-            DB::table('role_user')->insert([
-                'user_id' => $user->id,
-                'role_id' => $request->user_type_id,
-                'is_primary' => 1,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+    // Location scoping checks
+    if (!$hasFullAccess) {
+        $locationErrors = [
+            'division-admin' => fn() => $request->division_id != $authUser->division_id,
+            'district-admin' => fn() => $request->division_id != $authUser->division_id || $request->district_id != $authUser->district_id,
+            'upazila-admin' => fn() => $request->division_id != $authUser->division_id || $request->district_id != $authUser->district_id || $request->upazila_id != $authUser->upazila_id,
+            'union-admin' => fn() => $request->division_id != $authUser->division_id || $request->district_id != $authUser->district_id || $request->upazila_id != $authUser->upazila_id || $request->union_id != $authUser->union_id,
+        ];
 
-            return redirect()->route('users.index')->withSuccess('Employee updated successfully');
-        } catch (Exception $e) {
-            return back()->withError($e->getMessage())->withInput($request->all());
+        if (isset($locationErrors[$authPrimaryRole]) && $locationErrors[$authPrimaryRole]()) {
+            return back()->withError('Invalid location assignment as per your role.')->withInput();
         }
     }
+
+    try {
+        if (request()->has('photo')) {
+            $filePath = $this->fileUploadService->uploadImage('photo', 'users');
+            $data['photo'] = $filePath;
+        }
+
+        $data['dob'] = $data['dob'] ? Carbon::parse($data['dob'])->format('Y-m-d') : null;
+        $data['joining_date'] = $data['joining_date'] ? Carbon::parse($data['joining_date'])->format('Y-m-d') : null;
+
+        $data['is_admin'] = 1;
+
+        // Update user
+        User::where('id', $user->id)->update($data);
+
+        // Refresh role (always clean and assign fresh)
+        DB::table('role_user')->where('user_id', $user->id)->delete();
+        DB::table('role_user')->insert([
+            'user_id' => $user->id,
+            'role_id' => $request->user_type_id,
+            'is_primary' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('users.index')->withSuccess('Employee updated successfully');
+    } catch (\Exception $e) {
+        return back()->withError($e->getMessage())->withInput($request->all());
+    }
+}
+
 
     public function show(User $user)
     {
@@ -551,7 +565,7 @@ public function approveMemberRequest($id)
     
     // You could add notification logic here
     
-    return redirect()->back()->with('success', 'সদস্যতা আবেদন সফলভাবে অনুমোদিত হয়েছে!');
+    return redirect()->back()->with('success', 'সদস্য আবেদন সফলভাবে অনুমোদিত হয়েছে!');
 }
 
 /**
@@ -579,7 +593,7 @@ public function rejectMemberRequest(Request $request, $id)
     
     // You could add notification logic here
     
-    return redirect()->back()->with('success', 'সদস্যতা আবেদন প্রত্যাখ্যান করা হয়েছে।');
+    return redirect()->back()->with('success', 'সদস্য আবেদন প্রত্যাখ্যান করা হয়েছে।');
 }
 
 }

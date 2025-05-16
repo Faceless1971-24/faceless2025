@@ -1,6 +1,6 @@
 @extends('layouts.base')
 
-@section('title', 'সদস্যতা আবেদন পরিচালনা')
+@section('title', 'সদস্য আবেদন পরিচালনা')
 
 @section('breadcrumb')
     <div style="background-color: #f8f9fa; padding: 1rem 0; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -8,14 +8,14 @@
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
                     <h1 style="font-size: 1.5rem; font-weight: 600; margin: 0; color: #2c3e50;">
-                        সদস্যতা আবেদন পরিচালনা
+                        সদস্য আবেদন পরিচালনা
                     </h1>
                     <nav aria-label="breadcrumb">
                         <ol style="display: flex; list-style: none; margin: 0; padding: 0;">
                             <li style="margin-right: 0.5rem;">সদস্য</li>
                             <li>
                                 <span style="margin: 0 0.5rem;">/</span>
-                                <a href="#" style="color: #3498db; text-decoration: none;">সদস্যতা আবেদন</a>
+                                <a href="#" style="color: #3498db; text-decoration: none;">সদস্য আবেদন</a>
                             </li>
                         </ol>
                     </nav>
@@ -34,7 +34,7 @@
         <div
             style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #edf2f7; flex-wrap: wrap; gap: 1rem;">
             <h3 style="font-size: 1.25rem; font-weight: 600; margin: 0; color: #2c3e50;">
-                সদস্যতা আবেদন তালিকা
+                সদস্য আবেদন তালিকা
             </h3>
 
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">

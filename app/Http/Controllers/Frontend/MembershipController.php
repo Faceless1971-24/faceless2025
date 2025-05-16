@@ -31,8 +31,48 @@ class MembershipController extends Controller
      */
     public function index()
     {
-        return view('frontend.membership.index');
+        $authUser = auth()->user();
+
+        if (!$authUser) {
+            return redirect()->route('login')->with('error', 'Please login first');
+        }
+
+        // Step 1: Division admins
+        $divisionAdmins = User::where('is_admin', 1)
+            ->where('division_id', $authUser->division_id)
+            ->get(['id', 'name', 'phone']);
+
+        // Collect division admin IDs to exclude from lower levels
+        $excludedIds = $divisionAdmins->pluck('id')->toArray();
+
+        // Step 2: District admins (exclude division admins)
+        $districtAdmins = User::where('is_admin', 1)
+            ->where('district_id', $authUser->district_id)
+            ->whereNotIn('id', $excludedIds)
+            ->get(['id', 'name', 'phone']);
+
+        // Add district admin IDs to exclusion list
+        $excludedIds = array_merge($excludedIds, $districtAdmins->pluck('id')->toArray());
+
+        // Step 3: Upazila admins (exclude division and district admins)
+        $upazilaAdmins = User::where('is_admin', 1)
+            ->where('upazila_id', $authUser->upazila_id)
+            ->whereNotIn('id', $excludedIds)
+            ->get(['id', 'name', 'phone']);
+
+        // Add upazila admin IDs to exclusion list
+        $excludedIds = array_merge($excludedIds, $upazilaAdmins->pluck('id')->toArray());
+
+        // Step 4: Union admins (exclude all above)
+        $unionAdmins = User::where('is_admin', 1)
+            ->where('union_id', $authUser->union_id)
+            ->whereNotIn('id', $excludedIds)
+            ->get(['id', 'name', 'phone']);
+
+        return view('frontend.membership.index', compact('divisionAdmins', 'districtAdmins', 'upazilaAdmins', 'unionAdmins'));
     }
+
+
 
     /**
      * Show membership application form
@@ -48,7 +88,7 @@ class MembershipController extends Controller
 
         if ($existingApplication) {
             return redirect()->route('membership.status')
-                ->with('info', 'আপনি ইতিমধ্যে একটি সদস্যতা আবেদন জমা দিয়েছেন। দয়া করে আপনার আবেদনের স্ট্যাটাস দেখুন।');
+                ->with('info', 'আপনি ইতিমধ্যে একটি সদস্য আবেদন জমা দিয়েছেন। দয়া করে আপনার আবেদনের স্ট্যাটাস দেখুন।');
         }
 
         // Get all divisions for the form
@@ -150,7 +190,7 @@ try {
         $user->update($validated);
 
         return redirect()->route('membership.status')
-            ->with('success', 'আপনার সদস্যতা আবেদন সফলভাবে জমা হয়েছে। আমরা যাচাই করার পর আপনাকে জানাব।');
+            ->with('success', 'আপনার সদস্য আবেদন সফলভাবে জমা হয়েছে। আমরা যাচাই করার পর আপনাকে জানাব।');
     }
 
     public function status()

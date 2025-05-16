@@ -84,61 +84,76 @@
                         </div>
 
                         <!-- Address Section -->
-                        <div class="section address-section">
-                            <div class="section-grid location-info">
-                                <div class="form-group">
-                                    <label for="division_id">বিভাগ</label>
-                                    <select name="division_id" id="division_id" class="js-select2">
-                                        <option value="">-বিভাগ নির্বাচন করুন-</option>
-                                        @foreach ($divisions as $division)
-                                            <option value="{{ $division->id }}" {{ old('division_id') == $division->id ? 'selected' : '' }}>
-                                                {{ $division->bn_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                       <div class="section address-section">
+    <div class="section-grid location-info">
 
-                                <div class="form-group">
-                                    <label for="district_id">জেলা</label>
-                                    <select name="district_id" id="district_id" class="js-select2" {{ old('district_id') ? '' : 'disabled' }}>
-                                        <option value="">-জেলা নির্বাচন করুন-</option>
-                                        @if(old('district_id') && isset($districts))
-                                            @foreach ($districts as $district)
-                                                <option value="{{ $district->id }}" {{ old('district_id') == $district->id ? 'selected' : '' }}>
-                                                    {{ $district->bn_name }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
+        <!-- Division -->
+        <div class="form-group">
+            <label for="division_id">বিভাগ</label>
+            <select name="division_id" id="division_id" class="js-select2">
+                <option value="">-বিভাগ নির্বাচন করুন-</option>
+                @foreach ($divisions as $division)
+                    <option value="{{ $division->id }}" 
+                        {{ old('division_id', $user->division_id ?? '') == $division->id ? 'selected' : '' }}>
+                        {{ $division->bn_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
-                                <div class="form-group">
-                                    <label for="upazila_id">উপজেলা</label>
-                                    <select name="upazila_id" id="upazila_id" class="js-select2" {{ old('upazila_id') ? '' : 'disabled' }}>
-                                        <option value="">-উপজেলা নির্বাচন করুন-</option>
-                                        @if(old('upazila_id') && isset($upazilas))
-                                            @foreach ($upazilas as $upazila)
-                                                <option value="{{ $upazila->id }}" {{ old('upazila_id') == $upazila->id ? 'selected' : '' }}>
-                                                    {{ $upazila->bn_name }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
+        <!-- District -->
+        <div class="form-group">
+            <label for="district_id">জেলা</label>
+            <select name="district_id" id="district_id" class="js-select2" 
+                {{ old('district_id', $user->district_id ?? '') ? '' : 'disabled' }}>
+                <option value="">-জেলা নির্বাচন করুন-</option>
+                @if(old('district_id', $user->district_id ?? false) && isset($districts))
+                    @foreach ($districts as $district)
+                        <option value="{{ $district->id }}" 
+                            {{ old('district_id', $user->district_id ?? '') == $district->id ? 'selected' : '' }}>
+                            {{ $district->bn_name }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
 
-                                <div class="form-group">
-                                    <label for="union_id">ইউনিয়ন</label>
-                                    <select name="union_id" id="union_id" class="js-select2" {{ old('union_id') ? '' : 'disabled' }}>
-                                        <option value="">-ইউনিয়ন নির্বাচন করুন-</option>
-                                        @if(old('union_id') && isset($unions))
-                                            @foreach ($unions as $union)
-                                                <option value="{{ $union->id }}" {{ old('union_id') == $union->id ? 'selected' : '' }}>
-                                                    {{ $union->bn_name }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
+        <!-- Upazila -->
+        <div class="form-group">
+            <label for="upazila_id">উপজেলা</label>
+            <select name="upazila_id" id="upazila_id" class="js-select2"
+                {{ old('upazila_id', $user->upazila_id ?? '') ? '' : 'disabled' }}>
+                <option value="">-উপজেলা নির্বাচন করুন-</option>
+                @if(old('upazila_id', $user->upazila_id ?? false) && isset($upazilas))
+                    @foreach ($upazilas as $upazila)
+                        <option value="{{ $upazila->id }}" 
+                            {{ old('upazila_id', $user->upazila_id ?? '') == $upazila->id ? 'selected' : '' }}>
+                            {{ $upazila->bn_name }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+
+        <!-- Union -->
+        <div class="form-group">
+            <label for="union_id">ইউনিয়ন</label>
+            <select name="union_id" id="union_id" class="js-select2"
+                {{ old('union_id', $user->union_id ?? '') ? '' : 'disabled' }}>
+                <option value="">-ইউনিয়ন নির্বাচন করুন-</option>
+                @if(old('union_id', $user->union_id ?? false) && isset($unions))
+                    @foreach ($unions as $union)
+                        <option value="{{ $union->id }}" 
+                            {{ old('union_id', $user->union_id ?? '') == $union->id ? 'selected' : '' }}>
+                            {{ $union->bn_name }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+
+
+
 
 
                                 <div class="form-group">

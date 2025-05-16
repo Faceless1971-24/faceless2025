@@ -436,7 +436,7 @@
     @endauth
 
                         <a href="{{ route('membership.index') }}" class="bd-btn bd-btn-outline bd-btn-sm">
-                            <i class="fas fa-user-plus me-2"></i> সদস্যতা গ্রহণ
+                            <i class="fas fa-user-plus me-2"></i> সদস্য গ্রহণ
                         </a>
 
                     </div>

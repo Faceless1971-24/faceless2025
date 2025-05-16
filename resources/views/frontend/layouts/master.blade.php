@@ -198,7 +198,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
                 <a class="navbar-brand" href="{{ route('home') }}">
-                    <img src="{{ asset('theme/media/faceless.svg') }}" alt="{{ config('app.name') }}" class="brand-logo">
+                    <img src="{{ asset('theme/media/facelessD.jpeg') }}" alt="{{ config('app.name') }}" class="brand-logo">
                 </a>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
@@ -328,7 +328,7 @@
     @if($user->membership_status === 'approved' || $user->isAdmin())
 
                                     <a href="{{ route('frontend.campaigns.index') }}" class="footer-link"><i class="fas fa-chevron-right me-2"></i>ক্যাম্পেইন</a>
-                                    <a href="{{ route('membership.index') }}" class="footer-link"><i class="fas fa-chevron-right me-2"></i>সদস্যতা</a>
+                                    <a href="{{ route('membership.index') }}" class="footer-link"><i class="fas fa-chevron-right me-2"></i>সদস্য</a>
                                 @endif
 @endauth
                     </div>

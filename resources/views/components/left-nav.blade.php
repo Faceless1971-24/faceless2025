@@ -7,7 +7,7 @@
                     style="text-decoration: none;">
                     <!-- Collapsed Logo (mini sidebar mode) -->
                     <span class="smini-visible">
-                        <img src="{{ asset('theme/media/faceless.svg') }}" alt="Logo" width="24">
+                        <img src="{{ asset('theme/media/facelessD.jpeg') }}" alt="Logo" width="24">
                     </span>
                 
                     <!-- Full App Name (expanded sidebar mode) -->

@@ -16,7 +16,7 @@
             <div class="login-card">
                 <div class="brand-area">
                     <div class="brand-logo">
-                        <img src="{{ asset('theme/media/faceless.svg') }}" alt="Logo">
+                        <img src="{{ asset('theme/media/facelessD.jpeg') }}" alt="Logo">
                     </div>
                     <h1 class="welcome-text">Welcome Back</h1>
                     <p class="welcome-subtext">Sign in to continue to your account</p>

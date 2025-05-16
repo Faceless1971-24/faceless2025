@@ -5,7 +5,7 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">সদস্যতা আবেদনের অবস্থা</div>
+                    <div class="card-header">সদস্য আবেদনের অবস্থা</div>
 
                     <div class="card-body">
                         @if($application)
@@ -82,7 +82,7 @@
                                 </div>
                             @elseif($status === 'approved' || $status === 'active' || $application->is_active == 1)
                                 <div class="alert alert-success">
-                                    অভিনন্দন! আপনার সদস্যতা আবেদন অনুমোদিত হয়েছে। আপনি এখন সদস্য হিসেবে সকল সুবিধা ভোগ করতে পারবেন।
+                                    অভিনন্দন! আপনার সদস্য আবেদন অনুমোদিত হয়েছে। আপনি এখন সদস্য হিসেবে সকল সুবিধা ভোগ করতে পারবেন।
                                 </div>
                             @elseif($status === 'rejected')
                                 <div class="alert alert-danger">
@@ -98,7 +98,7 @@
                             @endif
                         @else
                             <div class="alert alert-info">
-                                আপনার কোন সদস্যতা আবেদন পাওয়া যায়নি। নতুন আবেদন করতে নীচের বাটন ক্লিক করুন।
+                                আপনার কোন সদস্য আবেদন পাওয়া যায়নি। নতুন আবেদন করতে নীচের বাটন ক্লিক করুন।
                             </div>
                             <div class="text-center mt-3">
                                 <a href="{{ route('membership.apply') }}" class="btn btn-primary">আবেদন করুন</a>

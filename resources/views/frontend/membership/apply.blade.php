@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'সদস্যতার আবেদন')
+@section('title', 'সদস্যর আবেদন')
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -82,11 +82,11 @@
     <div class="container py-5">
         <div class="row mb-4">
             <div class="col-12">
-                <h1 class="mb-2">সদস্যতার আবেদন</h1>
+                <h1 class="mb-2">সদস্যর আবেদন</h1>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">হোম</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('membership.index') }}">সদস্যতা</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('membership.index') }}">সদস্য</a></li>
                         <li class="breadcrumb-item active" aria-current="page">আবেদন</li>
                     </ol>
                 </nav>
@@ -392,7 +392,7 @@
                     <!-- Membership Information -->
                     <div class="form-section" id="membership-info">
                         <h3 class="form-section-title">
-                            <i class="fas fa-id-card me-2"></i> সদস্যতা তথ্য
+                            <i class="fas fa-id-card me-2"></i> সদস্য তথ্য
                         </h3>
 
                         <div class="row">
@@ -484,7 +484,7 @@
                     </div>
 
                     <div class="sidebar-step" data-section="membership-info">
-                        <span class="step-number">6</span> সদস্যতা তথ্য
+                        <span class="step-number">6</span> সদস্য তথ্য
                     </div>
 
                     <div class="sidebar-step" data-section="document-upload">
@@ -518,7 +518,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h5>সদস্যতার শর্তাবলী</h5>
+                    <h5>সদস্যর শর্তাবলী</h5>
                     <ol>
                         <li>আবেদনকারীকে বাংলাদেশী নাগরিক এবং ১৮ বছর বা তার বেশি বয়সী হতে হবে।</li>
                         <li>প্রদত্ত সকল তথ্য সঠিক ও সত্য হতে হবে। মিথ্যা তথ্য প্রদান করলে সদস্যপদ বাতিল করা হবে।</li>
@@ -527,15 +527,15 @@
                         <li>দলের সংবিধান ও নিয়মাবলী মেনে চলতে সম্মত থাকতে হবে।</li>
                         <li>আপনি সম্মত হচ্ছেন যে, আপনার প্রদত্ত তথ্য দলের কার্যক্রমের জন্য সংরক্ষণ ও ব্যবহার করা হবে।</li>
                         <li>সদস্যপদ প্রদানের বিষয়ে দলের সিদ্ধান্তই চূড়ান্ত বলে গণ্য হবে।</li>
-                        <li>সদস্যতা বাতিলের অধিকার দল সংরক্ষণ করে।</li>
+                        <li>সদস্য বাতিলের অধিকার দল সংরক্ষণ করে।</li>
                     </ol>
 
                     <h5 class="mt-4">ব্যক্তিগত তথ্য নীতিমালা</h5>
                     <p>আপনার প্রদত্ত তথ্য নিম্নলিখিত উদ্দেশ্যে ব্যবহার করা হবে:</p>
                     <ul>
-                        <li>সদস্যতা যাচাইকরণ ও অনুমোদন</li>
+                        <li>সদস্য যাচাইকরণ ও অনুমোদন</li>
                         <li>দলীয় কার্যক্রম সম্পর্কে অবহিতকরণ</li>
-                        <li>সদস্যতা ব্যবস্থাপনা</li>
+                        <li>সদস্য ব্যবস্থাপনা</li>
                         <li>অভ্যন্তরীণ বিশ্লেষণ ও পরিসংখ্যান</li>
                     </ul>
 
