@@ -414,60 +414,127 @@
 @endsection
 
 @section('content')
-        <div class="bd-times">
-            <!-- Modern Hero Section -->
-            <div class="bd-hero bd-fade-up">
-                <div class="bd-container">
-                    <h1 class="display-1">বাংলাদেশ উন্নয়ন অভিযান</h1>
-                    <p class="lead">সামাজিক পরিবর্তন এবং জাতীয় উন্নয়নের জন্য আমাদের অবিরাম প্রচেষ্টা</p>
+                <div class="bd-times">
+                    <!-- Modern Hero Section -->
+                    <div class="bd-hero bd-fade-up">
+                        <div class="bd-container">
+                            <h1 class="display-1">বাংলাদেশ উন্নয়ন অভিযান</h1>
+                            <p class="lead">সামাজিক পরিবর্তন এবং জাতীয় উন্নয়নের জন্য আমাদের অবিরাম প্রচেষ্টা</p>
 
-                    <!-- Quick Access Buttons -->
-                    <div class="bd-filter-group bd-mt-md">
+                            <!-- Quick Access Buttons -->
+                            <div class="bd-filter-group bd-mt-md">
     @auth
         @php
             $user = Auth::user();
         @endphp
 
         @if($user->membership_status === 'approved' || $user->isAdmin())
-                                <a href="{{ route('frontend.campaigns.index') }}" class="bd-btn bd-btn-primary bd-btn-sm">
-                                    <i class="fas fa-bullhorn me-2"></i> ক্যাম্পেইন দেখুন
-                                </a>
-                            @endif
+            <a href="{{ route('frontend.campaigns.index') }}" class="bd-btn bd-btn-primary bd-btn-sm">
+                <i class="fas fa-bullhorn me-2"></i> ক্যাম্পেইন দেখুন
+            </a>
+        @endif
+
+        @if($user->membership_status != 'approved')
+            <a href="{{ route('membership.index') }}" class="bd-btn bd-btn-outline bd-btn-sm">
+                <i class="fas fa-user-plus me-2"></i> সদস্য গ্রহণ
+            </a>
+        @endif
     @endauth
 
-                        <a href="{{ route('membership.index') }}" class="bd-btn bd-btn-outline bd-btn-sm">
-                            <i class="fas fa-user-plus me-2"></i> সদস্য গ্রহণ
-                        </a>
 
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-@auth
-    @php
+        @auth
+            @php
         $user = Auth::user();
-    @endphp
+            @endphp
 
-    @if($user->membership_status === 'approved' || $user->isAdmin())
-                    <!-- Main Content - Single Container Layout -->
-                    <div class="bd-container">
-                        <!-- Featured Campaign Slider Section -->
-                        <div class="bd-section bd-fade-up bd-delay-1">
-                            <h2 class="bd-section-title">প্রধান ক্যাম্পেইন</h2>
+            @if($user->membership_status === 'approved' || $user->isAdmin())
+                            <!-- Main Content - Single Container Layout -->
+                            <div class="bd-container">
+                                <!-- Featured Campaign Slider Section -->
+                                <div class="bd-section bd-fade-up bd-delay-1">
+                                    <h2 class="bd-section-title">প্রধান ক্যাম্পেইন</h2>
 
-                            <div id="featuredCampaignSlider" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-indicators">
-                                    @foreach($featuredCampaigns as $key => $campaign)
-                                        <button type="button" data-bs-target="#featuredCampaignSlider" data-bs-slide-to="{{ $key }}" 
-                                            class="{{ $key == 0 ? 'active' : '' }}" aria-current="{{ $key == 0 ? 'true' : 'false' }}" 
-                                            aria-label="Slide {{ $key + 1 }}"></button>
-                                    @endforeach
+                                    <div id="featuredCampaignSlider" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-indicators">
+                                            @foreach($featuredCampaigns as $key => $campaign)
+                                                <button type="button" data-bs-target="#featuredCampaignSlider" data-bs-slide-to="{{ $key }}" 
+                                                    class="{{ $key == 0 ? 'active' : '' }}" aria-current="{{ $key == 0 ? 'true' : 'false' }}" 
+                                                    aria-label="Slide {{ $key + 1 }}"></button>
+                                            @endforeach
+                                        </div>
+
+                                        <div class="carousel-inner">
+                                            @forelse($featuredCampaigns as $key => $campaign)
+                                                <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
+                                                    <div class="bd-campaign-card mx-auto" style="max-width: 800px;">
+                                                        <div class="bd-campaign-img">
+                                                            @if($campaign->images->count() > 0)
+                                                                <img src="{{ asset('storage/' . $campaign->images->first()->file_path) }}" 
+                                                                    alt="{{ $campaign->title }}">
+                                                            @else
+                                                                <img src="{{ asset('images/campaign-placeholder.jpg') }}" 
+                                                                    alt="{{ $campaign->title }}">
+                                                            @endif
+                                                            <div class="bd-campaign-tag">
+                                                                <i class="fas fa-star me-1"></i> বিশেষ
+                                                            </div>
+                                                        </div>
+                                                        <div class="bd-campaign-body">
+                                                            <h3 class="bd-campaign-title">{{ $campaign->title }}</h3>
+                                                            <p class="bd-campaign-text">
+                                                                {{ \Illuminate\Support\Str::limit(strip_tags($campaign->description), 200) }}
+                                                            </p>
+                                                            <div class="bd-campaign-meta">
+                                                                <span class="bd-campaign-date">
+                                                                    <i class="far fa-calendar-alt me-1"></i>
+                                                                    {{ $campaign->start_date->format('d/m/Y') }}
+                                                                </span>
+                                                                <a href="{{ route('frontend.campaigns.show', $campaign->id) }}" 
+                                                                class="bd-btn bd-btn-primary bd-btn-sm">
+                                                                    বিস্তারিত <i class="fas fa-arrow-right ms-1"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="carousel-item active">
+                                                    <div class="alert alert-info text-center py-4 w-100">
+                                                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                                        <p class="mb-0">বর্তমানে কোন বিশেষ ক্যাম্পেইন নেই।</p>
+                                                    </div>
+                                                </div>
+                                            @endforelse
+                                        </div>
+
+                                    @if($featuredCampaigns->count() > 1)
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#featuredCampaignSlider" data-bs-slide="prev"
+                                            style="background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 40px; height: 40px; top: 50%; transform: translateY(-50%); left: 15px;">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+
+                                        <button class="carousel-control-next" type="button" data-bs-target="#featuredCampaignSlider" data-bs-slide="next"
+                                            style="background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 40px; height: 40px; top: 50%; transform: translateY(-50%); right: 15px;">
+                                            <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+                                    @endif
+
+                                    </div>
                                 </div>
 
-                                <div class="carousel-inner">
-                                    @forelse($featuredCampaigns as $key => $campaign)
-                                        <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
-                                            <div class="bd-campaign-card mx-auto" style="max-width: 800px;">
+                                <!-- Top Performing Campaigns Section -->
+                                <div class="bd-section bd-fade-up bd-delay-2">
+                                    <h2 class="bd-section-title">সর্বাধিক জনপ্রিয় ক্যাম্পেইন</h2>
+
+                                    <div class="bd-campaigns" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                                        @forelse($topCampaigns as $campaign)
+                                            <div class="bd-campaign-card">
                                                 <div class="bd-campaign-img">
                                                     @if($campaign->images->count() > 0)
                                                         <img src="{{ asset('storage/' . $campaign->images->first()->file_path) }}" 
@@ -476,15 +543,35 @@
                                                         <img src="{{ asset('images/campaign-placeholder.jpg') }}" 
                                                             alt="{{ $campaign->title }}">
                                                     @endif
-                                                    <div class="bd-campaign-tag">
-                                                        <i class="fas fa-star me-1"></i> বিশেষ
+                                                    <div class="bd-campaign-tag" style="background-color: var(--accent);">
+                                                        <i class="fas fa-chart-line me-1"></i> জনপ্রিয়
                                                     </div>
                                                 </div>
                                                 <div class="bd-campaign-body">
                                                     <h3 class="bd-campaign-title">{{ $campaign->title }}</h3>
                                                     <p class="bd-campaign-text">
-                                                        {{ \Illuminate\Support\Str::limit(strip_tags($campaign->description), 200) }}
+                                                        {{ \Illuminate\Support\Str::limit(strip_tags($campaign->description), 120) }}
                                                     </p>
+                                                    <div class="campaign-stats" style="display: flex; margin-bottom: 15px;">
+                                                        <div style="flex: 1; text-align: center; border-right: 1px solid var(--gray-200);">
+                                                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
+                                                                {{ number_format($campaign->analytics->views) }}
+                                                            </div>
+                                                            <div style="font-size: 0.75rem; color: var(--gray-700);">দর্শন</div>
+                                                        </div>
+                                                        <div style="flex: 1; text-align: center; border-right: 1px solid var(--gray-200);">
+                                                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
+                                                                {{ number_format($campaign->analytics->engagements) }}
+                                                            </div>
+                                                            <div style="font-size: 0.75rem; color: var(--gray-700);">ইন্টারঅ্যাকশন</div>
+                                                        </div>
+                                                        <div style="flex: 1; text-align: center;">
+                                                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
+                                                                {{ number_format($campaign->analytics->supporters_count) }}
+                                                            </div>
+                                                            <div style="font-size: 0.75rem; color: var(--gray-700);">সমর্থক</div>
+                                                        </div>
+                                                    </div>
                                                     <div class="bd-campaign-meta">
                                                         <span class="bd-campaign-date">
                                                             <i class="far fa-calendar-alt me-1"></i>
@@ -497,268 +584,184 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @empty
-                                        <div class="carousel-item active">
-                                            <div class="alert alert-info text-center py-4 w-100">
-                                                <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                                <p class="mb-0">বর্তমানে কোন বিশেষ ক্যাম্পেইন নেই।</p>
+                                        @empty
+                                            <div class="col-12">
+                                                <div class="alert alert-info text-center py-4">
+                                                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                                    <p class="mb-0">পর্যাপ্ত তথ্য নেই।</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    @endforelse
+                                        @endforelse
+                                    </div>
                                 </div>
 
-                            @if($featuredCampaigns->count() > 1)
-                                <button class="carousel-control-prev" type="button" data-bs-target="#featuredCampaignSlider" data-bs-slide="prev"
-                                    style="background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 40px; height: 40px; top: 50%; transform: translateY(-50%); left: 15px;">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1);"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
+                                <!-- Two Column Flex Layout -->
+                                <div class="bd-grid" style="grid-template-columns: 1fr 1fr; grid-template-rows: auto auto;">
 
-                                <button class="carousel-control-next" type="button" data-bs-target="#featuredCampaignSlider" data-bs-slide="next"
-                                    style="background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 40px; height: 40px; top: 50%; transform: translateY(-50%); right: 15px;">
-                                    <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1);"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            @endif
+                                                    <!-- Our Campaigns Section - Spans Full Width -->
+                                    <div class="bd-fade-up bd-delay-3" style="grid-column: 1 / -1;">
+                                        <div class="bd-section">
+                                            <h2 class="bd-section-title">আমাদের ক্যাম্পেইন</h2>
 
-                            </div>
-                        </div>
-
-                        <!-- Top Performing Campaigns Section -->
-                        <div class="bd-section bd-fade-up bd-delay-2">
-                            <h2 class="bd-section-title">সর্বাধিক জনপ্রিয় ক্যাম্পেইন</h2>
-
-                            <div class="bd-campaigns" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                                @forelse($topCampaigns as $campaign)
-                                    <div class="bd-campaign-card">
-                                        <div class="bd-campaign-img">
-                                            @if($campaign->images->count() > 0)
-                                                <img src="{{ asset('storage/' . $campaign->images->first()->file_path) }}" 
-                                                    alt="{{ $campaign->title }}">
-                                            @else
-                                                <img src="{{ asset('images/campaign-placeholder.jpg') }}" 
-                                                    alt="{{ $campaign->title }}">
-                                            @endif
-                                            <div class="bd-campaign-tag" style="background-color: var(--accent);">
-                                                <i class="fas fa-chart-line me-1"></i> জনপ্রিয়
+                                            <!-- Filter Buttons -->
+                                            <div class="bd-filter-group">
+                                                <button type="button" class="bd-btn bd-btn-outline active" data-filter="all">
+                                                    সব ক্যাম্পেইন
+                                                </button>
+                                                <button type="button" class="bd-btn bd-btn-outline" data-filter="nationwide">
+                                                    জাতীয় পর্যায়ে
+                                                </button>
+                                                <button type="button" class="bd-btn bd-btn-outline" data-filter="regional">
+                                                    আঞ্চলিক
+                                                </button>
+                                                <button type="button" class="bd-btn bd-btn-outline" data-filter="local">
+                                                    স্থানীয়
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="bd-campaign-body">
-                                            <h3 class="bd-campaign-title">{{ $campaign->title }}</h3>
-                                            <p class="bd-campaign-text">
-                                                {{ \Illuminate\Support\Str::limit(strip_tags($campaign->description), 120) }}
-                                            </p>
-                                            <div class="campaign-stats" style="display: flex; margin-bottom: 15px;">
-                                                <div style="flex: 1; text-align: center; border-right: 1px solid var(--gray-200);">
-                                                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
-                                                        {{ number_format($campaign->analytics->views) }}
+
+                                            <!-- Campaigns Grid (3 column layout) -->
+                                            <div class="bd-campaigns" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                                            @forelse($latestCampaigns as $campaign)
+                                                    <div class="bd-campaign-card" 
+                                                        data-category="{{ $campaign->is_nationwide ? 'nationwide' :
+                    ($campaign->campaign_type == 'division' ? 'regional' :
+                        ($campaign->campaign_type == 'district' ? 'local' : 'other')) }}">
+                                                        <div class="bd-campaign-img">
+                                                            @if($campaign->images->count() > 0)
+                                                                <img src="{{ asset('storage/' . $campaign->images->first()->file_path) }}" 
+                                                                    alt="{{ $campaign->title }}">
+                                                            @else
+                                                                <img src="{{ asset('images/campaign-placeholder.jpg') }}" 
+                                                                    alt="{{ $campaign->title }}">
+                                                            @endif
+
+                                                            <div class="bd-campaign-tag">
+                                                                @if($campaign->is_nationwide)
+                                                                    <i class="fas fa-flag me-1"></i> জাতীয়
+                                                                @elseif($campaign->campaign_type == 'division')
+                                                                    <i class="fas fa-map me-1"></i> আঞ্চলিক
+                                                                @elseif($campaign->campaign_type == 'district')
+                                                                    <i class="fas fa-map-marker me-1"></i> স্থানীয়
+                                                                @else
+                                                                    <i class="fas fa-globe me-1"></i> অন্যান্য
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="bd-campaign-body">
+                                                            <h3 class="bd-campaign-title">{{ $campaign->title }}</h3>
+                                                            <p class="bd-campaign-text">
+                                                                {{ \Illuminate\Support\Str::limit(strip_tags($campaign->description), 100) }}
+                                                            </p>
+                                                            <div class="bd-campaign-meta">
+                                                                <span class="bd-campaign-date">
+                                                                    <i class="far fa-calendar-alt me-1"></i>
+                                                                    {{ $campaign->start_date->format('d/m/Y') }}
+                                                                </span>
+                                                                <a href="{{ route('frontend.campaigns.show', $campaign->id) }}" 
+                                                                class="bd-btn bd-btn-primary bd-btn-sm">
+                                                                    বিস্তারিত <i class="fas fa-arrow-right ms-1"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div style="font-size: 0.75rem; color: var(--gray-700);">দর্শন</div>
-                                                </div>
-                                                <div style="flex: 1; text-align: center; border-right: 1px solid var(--gray-200);">
-                                                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
-                                                        {{ number_format($campaign->analytics->engagements) }}
-                                                    </div>
-                                                    <div style="font-size: 0.75rem; color: var(--gray-700);">ইন্টারঅ্যাকশন</div>
-                                                </div>
-                                                <div style="flex: 1; text-align: center;">
-                                                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
-                                                        {{ number_format($campaign->analytics->supporters_count) }}
-                                                    </div>
-                                                    <div style="font-size: 0.75rem; color: var(--gray-700);">সমর্থক</div>
-                                                </div>
+                                            @empty
+                                            <div class="col-12">
+                                            <div class="alert alert-info text-center py-4">
+                                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                            <p class="mb-0">বর্তমানে কোন ক্যাম্পেইন নেই।</p>
                                             </div>
-                                            <div class="bd-campaign-meta">
-                                                <span class="bd-campaign-date">
-                                                    <i class="far fa-calendar-alt me-1"></i>
-                                                    {{ $campaign->start_date->format('d/m/Y') }}
-                                                </span>
-                                                <a href="{{ route('frontend.campaigns.show', $campaign->id) }}" 
-                                                class="bd-btn bd-btn-primary bd-btn-sm">
-                                                    বিস্তারিত <i class="fas fa-arrow-right ms-1"></i>
+                                            </div>
+                                            @endforelse
+                                            </div>
+
+                                            <!-- View All Button -->
+                                            <div class="bd-center bd-mt-lg">
+                                                <a href="{{ route('frontend.campaigns.index') }}" class="bd-btn bd-btn-primary bd-btn-lg">
+                                                    সকল ক্যাম্পেইন দেখুন <i class="fas fa-arrow-right ms-1"></i>
                                                 </a>
                                             </div>
                                         </div>
                                     </div>
-                                @empty
-                                    <div class="col-12">
-                                        <div class="alert alert-info text-center py-4">
-                                            <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                            <p class="mb-0">পর্যাপ্ত তথ্য নেই।</p>
-                                        </div>
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
 
-                        <!-- Two Column Flex Layout -->
-                        <div class="bd-grid" style="grid-template-columns: 1fr 1fr; grid-template-rows: auto auto;">
-
-                                            <!-- Our Campaigns Section - Spans Full Width -->
-                            <div class="bd-fade-up bd-delay-3" style="grid-column: 1 / -1;">
-                                <div class="bd-section">
-                                    <h2 class="bd-section-title">আমাদের ক্যাম্পেইন</h2>
-
-                                    <!-- Filter Buttons -->
-                                    <div class="bd-filter-group">
-                                        <button type="button" class="bd-btn bd-btn-outline active" data-filter="all">
-                                            সব ক্যাম্পেইন
-                                        </button>
-                                        <button type="button" class="bd-btn bd-btn-outline" data-filter="nationwide">
-                                            জাতীয় পর্যায়ে
-                                        </button>
-                                        <button type="button" class="bd-btn bd-btn-outline" data-filter="regional">
-                                            আঞ্চলিক
-                                        </button>
-                                        <button type="button" class="bd-btn bd-btn-outline" data-filter="local">
-                                            স্থানীয়
-                                        </button>
-                                    </div>
-
-                                    <!-- Campaigns Grid (3 column layout) -->
-                                    <div class="bd-campaigns" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-                                    @forelse($latestCampaigns as $campaign)
-                                            <div class="bd-campaign-card" 
-                                                data-category="{{ $campaign->is_nationwide ? 'nationwide' :
-                    ($campaign->campaign_type == 'division' ? 'regional' :
-                        ($campaign->campaign_type == 'district' ? 'local' : 'other')) }}">
-                                                <div class="bd-campaign-img">
-                                                    @if($campaign->images->count() > 0)
-                                                        <img src="{{ asset('storage/' . $campaign->images->first()->file_path) }}" 
-                                                            alt="{{ $campaign->title }}">
-                                                    @else
-                                                        <img src="{{ asset('images/campaign-placeholder.jpg') }}" 
-                                                            alt="{{ $campaign->title }}">
-                                                    @endif
-
-                                                    <div class="bd-campaign-tag">
-                                                        @if($campaign->is_nationwide)
-                                                            <i class="fas fa-flag me-1"></i> জাতীয়
-                                                        @elseif($campaign->campaign_type == 'division')
-                                                            <i class="fas fa-map me-1"></i> আঞ্চলিক
-                                                        @elseif($campaign->campaign_type == 'district')
-                                                            <i class="fas fa-map-marker me-1"></i> স্থানীয়
-                                                        @else
-                                                            <i class="fas fa-globe me-1"></i> অন্যান্য
-                                                        @endif
+                                    <!-- Upcoming Events Section -->
+                                    <div class="bd-fade-up bd-delay-1">
+                                        <div class="bd-card">
+                                            <div class="bd-card-header">
+                                                <h2 class="bd-card-title">আসন্ন ইভেন্টস</h2>
+                                            </div>
+                                            <div class="bd-card-body">
+                                                <div class="bd-list-item">
+                                                    <div class="badge">
+                                                        <i class="far fa-calendar-alt me-1"></i> ২৮ মে, ২০২৫
                                                     </div>
-                                                </div>
-
-                                                <div class="bd-campaign-body">
-                                                    <h3 class="bd-campaign-title">{{ $campaign->title }}</h3>
-                                                    <p class="bd-campaign-text">
-                                                        {{ \Illuminate\Support\Str::limit(strip_tags($campaign->description), 100) }}
+                                                    <h4 class="title">রাজধানী ঢাকায় বার্ষিক সম্মেলন</h4>
+                                                    <p class="meta">
+                                                        <i class="fas fa-map-marker-alt me-1"></i> বঙ্গবন্ধু আন্তর্জাতিক সম্মেলন কেন্দ্র
                                                     </p>
-                                                    <div class="bd-campaign-meta">
-                                                        <span class="bd-campaign-date">
-                                                            <i class="far fa-calendar-alt me-1"></i>
-                                                            {{ $campaign->start_date->format('d/m/Y') }}
-                                                        </span>
-                                                        <a href="{{ route('frontend.campaigns.show', $campaign->id) }}" 
-                                                        class="bd-btn bd-btn-primary bd-btn-sm">
-                                                            বিস্তারিত <i class="fas fa-arrow-right ms-1"></i>
-                                                        </a>
+                                                </div>
+                                                <div class="bd-list-item">
+                                                    <div class="badge">
+                                                        <i class="far fa-calendar-alt me-1"></i> ১৫ জুন, ২০২৫
                                                     </div>
+                                                    <h4 class="title">নেতৃত্ব বিকাশ কর্মশালা</h4>
+                                                    <p class="meta">
+                                                        <i class="fas fa-map-marker-alt me-1"></i> উন্নয়ন কম্পিউটার প্রশিক্ষণ কেন্দ্র, ঢাকা
+                                                    </p>
+                                                </div>
+                                                <div class="bd-list-item">
+                                                    <div class="badge">
+                                                        <i class="far fa-calendar-alt me-1"></i> ২২ জুন, ২০২৫
+                                                    </div>
+                                                    <h4 class="title">সামাজিক উন্নয়ন প্রজেক্ট উদ্বোধন</h4>
+                                                    <p class="meta">
+                                                        <i class="fas fa-map-marker-alt me-1"></i> রাজশাহী সিটি কমিউনিটি সেন্টার
+                                                    </p>
                                                 </div>
                                             </div>
-                                    @empty
-                                    <div class="col-12">
-                                    <div class="alert alert-info text-center py-4">
-                                    <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                    <p class="mb-0">বর্তমানে কোন ক্যাম্পেইন নেই।</p>
-                                    </div>
-                                    </div>
-                                    @endforelse
+                                        </div>
                                     </div>
 
-                                    <!-- View All Button -->
-                                    <div class="bd-center bd-mt-lg">
-                                        <a href="{{ route('frontend.campaigns.index') }}" class="bd-btn bd-btn-primary bd-btn-lg">
-                                            সকল ক্যাম্পেইন দেখুন <i class="fas fa-arrow-right ms-1"></i>
-                                        </a>
+                                    <!-- Recent News Section -->
+                                    <div class="bd-fade-up bd-delay-2">
+                                        <div class="bd-card">
+                                            <div class="bd-card-header">
+                                                <h2 class="bd-card-title">সাম্প্রতিক সংবাদ</h2>
+                                            </div>
+                                            <div class="bd-card-body">
+                                                <div class="bd-list-item">
+                                                    <div class="badge">
+                                                        <i class="far fa-newspaper me-1"></i> ১৫ এপ্রিল, ২০২৫
+                                                    </div>
+                                                    <h4 class="title">নতুন শাখা উদ্বোধন করেছে বাংলাদেশ উন্নয়ন আন্দোলন</h4>
+                                                    <p class="meta">খুলনা বিভাগে নতুন শাখা উদ্বোধন করেছে বাংলাদেশ উন্নয়ন আন্দোলন।</p>
+                                                </div>
+                                                <div class="bd-list-item">
+                                                    <div class="badge">
+                                                        <i class="far fa-newspaper me-1"></i> ২২ এপ্রিল, ২০২৫
+                                                    </div>
+                                                    <h4 class="title">যুব উন্নয়ন প্রকল্পের সাফল্য</h4>
+                                                    <p class="meta">গত বছর শুরু হওয়া যুব উন্নয়ন প্রকল্প এখন ফলপ্রসূ হতে শুরু করেছে।</p>
+                                                </div>
+                                                <div class="bd-list-item">
+                                                    <div class="badge">
+                                                        <i class="far fa-newspaper me-1"></i> ৩০ এপ্রিল, ২০২৫
+                                                    </div>
+                                                    <h4 class="title">সফল হল বৃক্ষরোপণ ক্যাম্পেইন</h4>
+                                                    <p class="meta">গত মাসে শুরু হওয়া বৃক্ষরোপণ ক্যাম্পেইনে ৫০,০০০ গাছ রোপণের লক্ষ্যমাত্রা অর্জন করা গেছে।</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+
+
                                 </div>
+
                             </div>
+                        @endif
+                    @endauth
 
-                            <!-- Upcoming Events Section -->
-                            <div class="bd-fade-up bd-delay-1">
-                                <div class="bd-card">
-                                    <div class="bd-card-header">
-                                        <h2 class="bd-card-title">আসন্ন ইভেন্টস</h2>
-                                    </div>
-                                    <div class="bd-card-body">
-                                        <div class="bd-list-item">
-                                            <div class="badge">
-                                                <i class="far fa-calendar-alt me-1"></i> ২৮ মে, ২০২৫
-                                            </div>
-                                            <h4 class="title">রাজধানী ঢাকায় বার্ষিক সম্মেলন</h4>
-                                            <p class="meta">
-                                                <i class="fas fa-map-marker-alt me-1"></i> বঙ্গবন্ধু আন্তর্জাতিক সম্মেলন কেন্দ্র
-                                            </p>
-                                        </div>
-                                        <div class="bd-list-item">
-                                            <div class="badge">
-                                                <i class="far fa-calendar-alt me-1"></i> ১৫ জুন, ২০২৫
-                                            </div>
-                                            <h4 class="title">নেতৃত্ব বিকাশ কর্মশালা</h4>
-                                            <p class="meta">
-                                                <i class="fas fa-map-marker-alt me-1"></i> উন্নয়ন কম্পিউটার প্রশিক্ষণ কেন্দ্র, ঢাকা
-                                            </p>
-                                        </div>
-                                        <div class="bd-list-item">
-                                            <div class="badge">
-                                                <i class="far fa-calendar-alt me-1"></i> ২২ জুন, ২০২৫
-                                            </div>
-                                            <h4 class="title">সামাজিক উন্নয়ন প্রজেক্ট উদ্বোধন</h4>
-                                            <p class="meta">
-                                                <i class="fas fa-map-marker-alt me-1"></i> রাজশাহী সিটি কমিউনিটি সেন্টার
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Recent News Section -->
-                            <div class="bd-fade-up bd-delay-2">
-                                <div class="bd-card">
-                                    <div class="bd-card-header">
-                                        <h2 class="bd-card-title">সাম্প্রতিক সংবাদ</h2>
-                                    </div>
-                                    <div class="bd-card-body">
-                                        <div class="bd-list-item">
-                                            <div class="badge">
-                                                <i class="far fa-newspaper me-1"></i> ১৫ এপ্রিল, ২০২৫
-                                            </div>
-                                            <h4 class="title">নতুন শাখা উদ্বোধন করেছে বাংলাদেশ উন্নয়ন আন্দোলন</h4>
-                                            <p class="meta">খুলনা বিভাগে নতুন শাখা উদ্বোধন করেছে বাংলাদেশ উন্নয়ন আন্দোলন।</p>
-                                        </div>
-                                        <div class="bd-list-item">
-                                            <div class="badge">
-                                                <i class="far fa-newspaper me-1"></i> ২২ এপ্রিল, ২০২৫
-                                            </div>
-                                            <h4 class="title">যুব উন্নয়ন প্রকল্পের সাফল্য</h4>
-                                            <p class="meta">গত বছর শুরু হওয়া যুব উন্নয়ন প্রকল্প এখন ফলপ্রসূ হতে শুরু করেছে।</p>
-                                        </div>
-                                        <div class="bd-list-item">
-                                            <div class="badge">
-                                                <i class="far fa-newspaper me-1"></i> ৩০ এপ্রিল, ২০২৫
-                                            </div>
-                                            <h4 class="title">সফল হল বৃক্ষরোপণ ক্যাম্পেইন</h4>
-                                            <p class="meta">গত মাসে শুরু হওয়া বৃক্ষরোপণ ক্যাম্পেইনে ৫০,০০০ গাছ রোপণের লক্ষ্যমাত্রা অর্জন করা গেছে।</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </div>
-
-                    </div>
-                @endif
-            @endauth
-
-        </div>
+                </div>
 @endsection
 
 @section('scripts')
