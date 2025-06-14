@@ -310,10 +310,9 @@
                         <h5 class="footer-heading">আমাদের সম্পর্কে</h5>
 <p class="mb-4">বাংলাদেশ আওয়ামী লীগ দেশের ইতিহাস, ঐতিহ্য ও উন্নয়নের প্রতীক — আমরা জনগণের কণ্ঠস্বর, প্রগতির পথপ্রদর্শক।</p>
                         <div class="mt-4">
-                            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="https://www.facebook.com/share/1XaMG8QM45/" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://x.com/X90Degree" class="social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="https://youtube.com/@faceless.democracy?si=ojh8L6Beyww7j6Ep" class="social-icon"><i class="fab fa-youtube"></i></a>
                         </div>
                     </div>
                     
