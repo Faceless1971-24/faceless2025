@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'ক্যাম্পেইন সমূহ')
+@section('title', 'কর্মসূচি সমূহ')
 
 @section('styles')
     <style>
@@ -257,8 +257,8 @@
     <!-- Hero Section -->
     <div class="cp-hero">
         <div class="cp-container">
-            <h1 class="cp-title">আমাদের ক্যাম্পেইন সমূহ</h1>
-            <p class="cp-lead">পরিবর্তনের জন্য আমাদের অংশীদার হোন। আমাদের ক্যাম্পেইনে সমর্থন দিন এবং ইতিবাচক পরিবর্তনে
+            <h1 class="cp-title">আমাদের কর্মসূচি সমূহ</h1>
+            <p class="cp-lead">পরিবর্তনের জন্য আমাদের অংশীদার হোন। আমাদের কর্মসূচিে সমর্থন দিন এবং ইতিবাচক পরিবর্তনে
                 অংশগ্রহণ করুন।</p>
         </div>
     </div>
@@ -267,7 +267,7 @@
         <!-- Filter Section -->
         <div class="cp-filter">
             <button class="cp-filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#cpFilterBody">
-                <span>ক্যাম্পেইন ফিল্টার করুন</span>
+                <span>কর্মসূচি ফিল্টার করুন</span>
                 <i class="fas fa-sliders-h"></i>
             </button>
 
@@ -306,7 +306,7 @@
                         </div>
                         <div class="col-md-8 mb-3">
                             <input type="text" class="form-control" id="search" name="search"
-                                placeholder="ক্যাম্পেইন খুঁজুন..." value="{{ request('search') }}">
+                                placeholder="কর্মসূচি খুঁজুন..." value="{{ request('search') }}">
                         </div>
                         <div class="col-md-4 mb-3 d-flex gap-2">
                             <button type="submit" class="btn btn-primary flex-grow-1">
@@ -325,10 +325,10 @@
         @if($campaigns->isEmpty())
             <div class="cp-empty">
                 <i class="fas fa-search fa-3x mb-3 text-muted"></i>
-                <h4>কোন ক্যাম্পেইন পাওয়া যায়নি!</h4>
-                <p>দুঃখিত, আপনার অনুসন্ধান অনুযায়ী কোন ক্যাম্পেইন পাওয়া যায়নি।</p>
+                <h4>কোন কর্মসূচি পাওয়া যায়নি!</h4>
+                <p>দুঃখিত, আপনার অনুসন্ধান অনুযায়ী কোন কর্মসূচি পাওয়া যায়নি।</p>
                 <a href="{{ route('frontend.campaigns.index') }}" class="cp-btn mt-3">
-                    <i class="fas fa-redo me-1"></i> সব ক্যাম্পেইন দেখুন
+                    <i class="fas fa-redo me-1"></i> সব কর্মসূচি দেখুন
                 </a>
             </div>
         @else

@@ -1,5 +1,5 @@
 @extends('layouts.base')
-@section('title', 'নতুন ক্যাম্পেইন')
+@section('title', 'নতুন কর্মসূচি')
 
 @section('styles_before')
     <style>
@@ -229,9 +229,9 @@
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
                 <nav class="flex-sm-00-auto ml-sm-3" aria-label="breadcrumb">
                     <ol class="breadcrumb breadcrumb-alt breadcrumb-custom">
-                        <li class="breadcrumb-item">ক্যাম্পেইন</li>
+                        <li class="breadcrumb-item">কর্মসূচি</li>
                         <li class="breadcrumb-item" aria-current="page">
-                            <a class="link-fx" href="">নতুন ক্যাম্পেইন</a>
+                            <a class="link-fx" href="">নতুন কর্মসূচি</a>
                         </li>
                     </ol>
                 </nav>
@@ -250,7 +250,7 @@
                 @csrf
                 <div class="card">
                     <div class="card-header custom-card-header">
-                        <h3 class="block-title">নতুন ক্যাম্পেইন যুক্ত করুন</h3>
+                        <h3 class="block-title">নতুন কর্মসূচি যুক্ত করুন</h3>
                     </div>
 
                     <div class="block-content block-content-full">
@@ -258,10 +258,10 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label for="title">ক্যাম্পেইন শিরোনাম <span
+                                        <label for="title">কর্মসূচি শিরোনাম <span
                                                 class="required-asterisk">*</span></label>
                                         <input type="text" class="form-control" id="title" name="title" required
-                                            placeholder="ক্যাম্পেইনের শিরোনাম লিখুন">
+                                            placeholder="কর্মসূচিের শিরোনাম লিখুন">
                                     </div>
                                 </div>
                             </div>
@@ -269,7 +269,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label for="description">ক্যাম্পেইন বিবরণ <span
+                                        <label for="description">কর্মসূচি বিবরণ <span
                                                 class="required-asterisk">*</span></label>
                                         <textarea id="summernoteAddCampaign" class="form-control" name="description"
                                             required></textarea>
@@ -280,10 +280,10 @@
 
                         <div class="custom-form-section">
                             <h2 class="section-heading">
-                                ক্যাম্পেইনের ধরন নির্বাচন করুন
+                                কর্মসূচিের ধরন নির্বাচন করুন
                                 <small class="text-muted ml-2">
                                     <i class="fa fa-info-circle" data-toggle="tooltip"
-                                        title="ক্যাম্পেইনের অবস্থান পরিধি নির্ধারণ করুন"></i>
+                                        title="কর্মসূচিের অবস্থান পরিধি নির্ধারণ করুন"></i>
                                 </small>
                             </h2>
 
@@ -291,27 +291,27 @@
                                 <div class="campaign-type-option" data-type="nationwide">
                                     <i class="fa fa-globe"></i>
                                     <h5>বাংলাদেশ জুড়ে</h5>
-                                    <p class="text-muted small">সমগ্র দেশে ক্যাম্পেইন চালানো হবে</p>
+                                    <p class="text-muted small">সমগ্র দেশে কর্মসূচি চালানো হবে</p>
                                 </div>
                                 <div class="campaign-type-option" data-type="division">
                                     <i class="fa fa-map"></i>
                                     <h5>বিভাগ ভিত্তিক</h5>
-                                    <p class="text-muted small">নির্দিষ্ট বিভাগে ক্যাম্পেইন চালানো হবে</p>
+                                    <p class="text-muted small">নির্দিষ্ট বিভাগে কর্মসূচি চালানো হবে</p>
                                 </div>
                                 <div class="campaign-type-option" data-type="district">
                                     <i class="fa fa-map-marker"></i>
                                     <h5>জেলা ভিত্তিক</h5>
-                                    <p class="text-muted small">নির্দিষ্ট জেলায় ক্যাম্পেইন চালানো হবে</p>
+                                    <p class="text-muted small">নির্দিষ্ট জেলায় কর্মসূচি চালানো হবে</p>
                                 </div>
                                 <div class="campaign-type-option" data-type="upazila">
                                     <i class="fa fa-map-o"></i>
                                     <h5>উপজেলা ভিত্তিক</h5>
-                                    <p class="text-muted small">নির্দিষ্ট উপজেলায় ক্যাম্পেইন চালানো হবে</p>
+                                    <p class="text-muted small">নির্দিষ্ট উপজেলায় কর্মসূচি চালানো হবে</p>
                                 </div>
                                 <div class="campaign-type-option" data-type="union">
                                     <i class="fa fa-map-pin"></i>
                                     <h5>ইউনিয়ন ভিত্তিক</h5>
-                                    <p class="text-muted small">নির্দিষ্ট ইউনিয়নে ক্যাম্পেইন চালানো হবে</p>
+                                    <p class="text-muted small">নির্দিষ্ট ইউনিয়নে কর্মসূচি চালানো হবে</p>
                                 </div>
                             </div>
 
@@ -324,7 +324,7 @@
                                 অবস্থান নির্বাচন করুন
                                 <small class="text-muted ml-2">
                                     <i class="fa fa-info-circle" data-toggle="tooltip"
-                                        title="ক্যাম্পেইন চালানোর অবস্থান নির্বাচন করুন"></i>
+                                        title="কর্মসূচি চালানোর অবস্থান নির্বাচন করুন"></i>
                                 </small>
                             </h2>
 
@@ -397,7 +397,7 @@
                                 সময়কাল নির্ধারণ করুন
                                 <small class="text-muted ml-2">
                                     <i class="fa fa-info-circle" data-toggle="tooltip"
-                                        title="ক্যাম্পেইন শুরু এবং শেষের তারিখ নির্ধারণ করুন"></i>
+                                        title="কর্মসূচি শুরু এবং শেষের তারিখ নির্ধারণ করুন"></i>
                                 </small>
                             </h2>
                             <div class="row">
@@ -425,7 +425,7 @@
                                 মিডিয়া সংযুক্তি
                                 <small class="text-muted ml-2">
                                     <i class="fa fa-info-circle" data-toggle="tooltip"
-                                        title="ক্যাম্পেইনের জন্য অডিও, ভিডিও এবং ইমেজ আপলোড করুন"></i>
+                                        title="কর্মসূচিের জন্য অডিও, ভিডিও এবং ইমেজ আপলোড করুন"></i>
                                 </small>
                             </h2>
                             <!-- Images Upload -->
@@ -493,7 +493,7 @@
                         </div>
 
                         <div class="custom-form-section">
-                            <h2 class="section-heading">ক্যাম্পেইন সেটিংস</h2>
+                            <h2 class="section-heading">কর্মসূচি সেটিংস</h2>
                             <div class="settings-container">
                                 <div class="row">
                                     <div class="col-md-4">
@@ -520,7 +520,7 @@
 
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="featured">ফিচারড ক্যাম্পেইন?</label>
+                                            <label for="featured">ফিচারড কর্মসূচি?</label>
                                             <select class="form-control" id="featured" name="featured">
                                                 <option value="0">না</option>
                                                 <option value="1">হ্যাঁ</option>
@@ -532,7 +532,7 @@
                         </div>
                         <div class="form-group mt-4 d-flex justify-content-center">
                             <button type="submit" class="btn btn-custom-success" id="saveCampaign">
-                                <i class="fa fa-save mr-1"></i> ক্যাম্পেইন যুক্ত করুন
+                                <i class="fa fa-save mr-1"></i> কর্মসূচি যুক্ত করুন
                             </button>
                         </div>
                     </div>
@@ -748,20 +748,20 @@
                 // Basic form validation
                 if (!$('#title').val().trim()) {
                     e.preventDefault();
-                    alert('ক্যাম্পেইন শিরোনাম দিন');
+                    alert('কর্মসূচি শিরোনাম দিন');
                     return false;
                 }
 
                 if (!$('#summernoteAddCampaign').val().trim()) {
                     e.preventDefault();
-                    alert('ক্যাম্পেইন বিবরণ দিন');
+                    alert('কর্মসূচি বিবরণ দিন');
                     return false;
                 }
 
                 // Campaign type validation
                 if (!campaignType) {
                     e.preventDefault();
-                    alert('অনুগ্রহ করে ক্যাম্পেইনের ধরন নির্বাচন করুন');
+                    alert('অনুগ্রহ করে কর্মসূচিের ধরন নির্বাচন করুন');
                     return false;
                 }
 

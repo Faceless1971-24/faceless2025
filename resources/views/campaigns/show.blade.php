@@ -1,13 +1,13 @@
 @extends('layouts.base')
 
-@section('title', 'ক্যাম্পেইন বিস্তারিত')
+@section('title', 'কর্মসূচি বিস্তারিত')
 
 @section('breadcrumb')
     <div class="bg-body-light">
         <div class="content content-full">
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
                 <h1 class="h3 fw-bold mb-1">
-                    <a href="{{ route('campaigns.index') }}" class="text-decoration-none">ক্যাম্পেইন</a>
+                    <a href="{{ route('campaigns.index') }}" class="text-decoration-none">কর্মসূচি</a>
                     <small class="fw-normal text-muted"> / বিস্তারিত</small>
                 </h1>
             </div>
@@ -58,7 +58,7 @@
                                 <span>{{ $campaign->creator ? $campaign->creator->name : 'অজানা' }}</span>
                             </div>
                             <div class="d-flex justify-content-between py-2 border-bottom">
-                                <strong>ক্যাম্পেইনের ধরন:</strong>
+                                <strong>কর্মসূচিের ধরন:</strong>
                                 <span>
                                     @if($campaign->is_nationwide)
                                         বাংলাদেশ জুড়ে
@@ -114,7 +114,7 @@
                     <div class="col-md-8">
                         <!-- Description Section -->
                         <div class="mb-5">
-                            <h4 class="fw-semibold mb-3 border-bottom pb-2">ক্যাম্পেইন বিবরণ</h4>
+                            <h4 class="fw-semibold mb-3 border-bottom pb-2">কর্মসূচি বিবরণ</h4>
                             <div class="campaign-description">
                                 {!! $campaign->description !!}
                             </div>
@@ -125,7 +125,7 @@
                             <h4 class="fw-semibold mb-3 border-bottom pb-2">অবস্থান</h4>
                             @if($campaign->is_nationwide)
                                 <div class="alert alert-info">
-                                    <i class="fa fa-globe me-2"></i> এই ক্যাম্পেইন বাংলাদেশের সকল অঞ্চলে চলবে।
+                                    <i class="fa fa-globe me-2"></i> এই কর্মসূচি বাংলাদেশের সকল অঞ্চলে চলবে।
                                 </div>
                             @else
                                 <div class="row">
@@ -278,7 +278,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    আপনি কি নিশ্চিত যে আপনি "{{ $campaign->title }}" ক্যাম্পেইন মুছতে চান?
+                    আপনি কি নিশ্চিত যে আপনি "{{ $campaign->title }}" কর্মসূচি মুছতে চান?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">বাতিল করুন</button>

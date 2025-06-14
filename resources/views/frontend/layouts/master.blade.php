@@ -222,7 +222,7 @@
 
                                             <li class="nav-item px-3 py-2 fs-5">
                                                 <a class="nav-link {{ request()->routeIs('frontend.campaigns.*') ? 'active' : '' }}" href="{{ route('frontend.campaigns.index') }}">
-                                                    <i class="fas fa-bullhorn me-1"></i> ক্যাম্পেইন
+                                                    <i class="fas fa-bullhorn me-1"></i> কর্মসূচি
                                                 </a>
                                             </li>
                                             <li class="nav-item px-3 py-2 fs-5">
@@ -308,7 +308,7 @@
                 <div class="row gy-4">
                     <div class="col-xl-6 col-md-12">
                         <h5 class="footer-heading">আমাদের সম্পর্কে</h5>
-                        <p class="mb-4">আমরা একটি রাজনৈতিক দল যা বাংলাদেশের সাধারণ মানুষের প্রতিনিধিত্ব করে এবং জনগণের কল্যাণে কাজ করে।</p>
+<p class="mb-4">বাংলাদেশ আওয়ামী লীগ দেশের ইতিহাস, ঐতিহ্য ও উন্নয়নের প্রতীক — আমরা জনগণের কণ্ঠস্বর, প্রগতির পথপ্রদর্শক।</p>
                         <div class="mt-4">
                             <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
                             <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
@@ -327,7 +327,7 @@
 
     @if($user->membership_status === 'approved' || $user->isAdmin())
 
-                                    <a href="{{ route('frontend.campaigns.index') }}" class="footer-link"><i class="fas fa-chevron-right me-2"></i>ক্যাম্পেইন</a>
+                                    <a href="{{ route('frontend.campaigns.index') }}" class="footer-link"><i class="fas fa-chevron-right me-2"></i>কর্মসূচি</a>
                                     <a href="{{ route('membership.index') }}" class="footer-link"><i class="fas fa-chevron-right me-2"></i>সদস্য</a>
                                 @endif
 @endauth

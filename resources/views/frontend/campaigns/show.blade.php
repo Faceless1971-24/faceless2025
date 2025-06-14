@@ -800,7 +800,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb custom-breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">হোম</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('frontend.campaigns.index') }}">ক্যাম্পেইন</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('frontend.campaigns.index') }}">কর্মসূচি</a></li>
                         <li class="breadcrumb-item active" aria-current="page">{{ $campaign->title }}</li>
                     </ol>
                 </nav>
@@ -836,7 +836,7 @@
 
                     <!-- Campaign Meta Information -->
                     <div class="campaign-meta-container">
-                        <h2 class="meta-title">ক্যাম্পেইন তথ্য</h2>
+                        <h2 class="meta-title">কর্মসূচি তথ্য</h2>
                         <div class="campaign-meta">
                             <div class="campaign-meta-item">
                                 <div class="meta-icon">
@@ -913,7 +913,7 @@
 
                     <!-- Campaign Description -->
                     <div class="content-section">
-                        <h2 class="section-title">ক্যাম্পেইন বিবরণ</h2>
+                        <h2 class="section-title">কর্মসূচি বিবরণ</h2>
                         <div class="campaign-description">
                             {!! $campaign->description !!}
                         </div>
@@ -930,7 +930,7 @@
                                             <div class="media-icon me-3">
                                                 <i class="fas fa-headphones"></i>
                                             </div>
-                                            <h3 class="media-title mb-0">{{ $campaign->audio->title ?: 'ক্যাম্পেইন অডিও' }}</h3>
+                                            <h3 class="media-title mb-0">{{ $campaign->audio->title ?: 'কর্মসূচি অডিও' }}</h3>
                                         </div>
                                         <audio controls class="w-100">
                                             <source src="{{ asset('storage/' . $campaign->audio->file_path) }}" type="audio/mp3">
@@ -949,7 +949,7 @@
                                 <div class="content-section">
                                     <h2 class="section-title">ভিডিও</h2>
                                     <div class="media-card p-4">
-                                        <h3 class="media-title">{{ $campaign->video->title ?: 'ক্যাম্পেইন ভিডিও' }}</h3>
+                                        <h3 class="media-title">{{ $campaign->video->title ?: 'কর্মসূচি ভিডিও' }}</h3>
                                         <div class="video-container">
                                             @if(Str::contains($campaign->video->file_path, ['youtube.com', 'youtu.be']))
                                                 <div class="ratio ratio-16x9 mb-3">
@@ -1057,7 +1057,7 @@
                 <div class="col-lg-4">
                     <!-- Support Card -->
                     <div class="sidebar-card">
-                        <h3 class="sidebar-title">ক্যাম্পেইন সমর্থন</h3>
+                        <h3 class="sidebar-title">কর্মসূচি সমর্থন</h3>
 
                         @if($campaign->analytics)
                             <div class="mb-4">
@@ -1096,7 +1096,7 @@
                                         <i class="fas fa-check-circle text-success me-2 fa-2x"></i>
                                         <div>
                                             <h5 class="mb-1">ধন্যবাদ!</h5>
-                                            <p class="mb-0">আপনি ইতিমধ্যে এই ক্যাম্পেইন সমর্থন করেছেন!</p>
+                                            <p class="mb-0">আপনি ইতিমধ্যে এই কর্মসূচি সমর্থন করেছেন!</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1107,7 +1107,7 @@
                                     <i class="fas fa-info-circle text-info me-2 fa-2x"></i>
                                     <div>
                                         <h5 class="mb-1">সমর্থন করুন</h5>
-                                        <p class="mb-0">ক্যাম্পেইন সমর্থন করতে <a href="{{ route('login') }}">লগইন</a> করুন।</p>
+                                        <p class="mb-0">কর্মসূচি সমর্থন করতে <a href="{{ route('login') }}">লগইন</a> করুন।</p>
                                     </div>
                                 </div>
                             </div>
@@ -1165,7 +1165,7 @@
                     <!-- Related Campaigns -->
                     @if($relatedCampaigns->count() > 0)
                         <div class="sidebar-card">
-                            <h3 class="sidebar-title">সম্পর্কিত ক্যাম্পেইন</h3>
+                            <h3 class="sidebar-title">সম্পর্কিত কর্মসূচি</h3>
 
                             @foreach($relatedCampaigns as $relatedCampaign)
                                 <div class="card related-card mb-3">
@@ -1209,8 +1209,8 @@
                             <div class="mb-3">
                                 <i class="fas fa-bullhorn fa-3x text-primary"></i>
                             </div>
-                            <h4 class="mb-3">নিজের ক্যাম্পেইন শুরু করুন</h4>
-                            <p class="mb-4">আপনার নিজের সামাজিক উদ্যোগ বা আন্দোলন শুরু করতে চান? আজই একটি নতুন ক্যাম্পেইন তৈরি
+                            <h4 class="mb-3">নিজের কর্মসূচি শুরু করুন</h4>
+                            <p class="mb-4">আপনার নিজের সামাজিক উদ্যোগ বা আন্দোলন শুরু করতে চান? আজই একটি নতুন কর্মসূচি তৈরি
                                 করুন।</p>
 
                         </div>

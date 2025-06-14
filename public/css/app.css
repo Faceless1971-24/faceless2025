@@ -1,20 +1,3 @@
-
-.bg-login {
-    position: fixed;                   /* 🔒 Fixed to the viewport */
-    top: 0;
-    left: 0;
-    width: 100vw;                      /* Full width of the viewport */
-    height: 100vh;                     /* Full height of the viewport */
-    /* background-image: url('/images/login-bg-img.jpg'); */
-    background-size: cover;           /* Cover entire area */
-    background-repeat: no-repeat;
-    background-position: center center;
-    z-index: -1;                       /* Push behind content */
-}
-
-
-
-
 .profile-icon {
     padding: 6px;
     background: #30c78d;

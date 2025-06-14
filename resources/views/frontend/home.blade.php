@@ -418,8 +418,8 @@
                     <!-- Modern Hero Section -->
                     <div class="bd-hero bd-fade-up">
                         <div class="bd-container">
-                            <h1 class="display-1">বাংলাদেশ উন্নয়ন অভিযান</h1>
-                            <p class="lead">সামাজিক পরিবর্তন এবং জাতীয় উন্নয়নের জন্য আমাদের অবিরাম প্রচেষ্টা</p>
+                            <h1 class="display-1">বাংলাদেশ আওয়ামী লীগের নেতৃত্বে টেকসই উন্নয়ন ও সামাজিক অগ্রগতির এক নতুন অধ্যায়।</h1>
+                            <p class="lead">বঙ্গবন্ধুর আদর্শ ও শেখ হাসিনার ভিশন নিয়ে — উন্নয়নের পথে এক সাথে</p>
 
                             <!-- Quick Access Buttons -->
                             <div class="bd-filter-group bd-mt-md">
@@ -430,7 +430,7 @@
 
         @if($user->membership_status === 'approved' || $user->isAdmin())
             <a href="{{ route('frontend.campaigns.index') }}" class="bd-btn bd-btn-primary bd-btn-sm">
-                <i class="fas fa-bullhorn me-2"></i> ক্যাম্পেইন দেখুন
+                <i class="fas fa-bullhorn me-2"></i> কর্মসূচি দেখুন
             </a>
         @endif
 
@@ -456,7 +456,7 @@
                             <div class="bd-container">
                                 <!-- Featured Campaign Slider Section -->
                                 <div class="bd-section bd-fade-up bd-delay-1">
-                                    <h2 class="bd-section-title">প্রধান ক্যাম্পেইন</h2>
+                                    <h2 class="bd-section-title">প্রধান কর্মসূচি</h2>
 
                                     <div id="featuredCampaignSlider" class="carousel slide" data-bs-ride="carousel">
                                         <div class="carousel-indicators">
@@ -505,7 +505,7 @@
                                                 <div class="carousel-item active">
                                                     <div class="alert alert-info text-center py-4 w-100">
                                                         <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                                        <p class="mb-0">বর্তমানে কোন বিশেষ ক্যাম্পেইন নেই।</p>
+                                                        <p class="mb-0">বর্তমানে কোন বিশেষ কর্মসূচি নেই।</p>
                                                     </div>
                                                 </div>
                                             @endforelse
@@ -530,7 +530,7 @@
 
                                 <!-- Top Performing Campaigns Section -->
                                 <div class="bd-section bd-fade-up bd-delay-2">
-                                    <h2 class="bd-section-title">সর্বাধিক জনপ্রিয় ক্যাম্পেইন</h2>
+                                    <h2 class="bd-section-title">সর্বাধিক জনপ্রিয় কর্মসূচি</h2>
 
                                     <div class="bd-campaigns" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
                                         @forelse($topCampaigns as $campaign)
@@ -601,12 +601,12 @@
                                                     <!-- Our Campaigns Section - Spans Full Width -->
                                     <div class="bd-fade-up bd-delay-3" style="grid-column: 1 / -1;">
                                         <div class="bd-section">
-                                            <h2 class="bd-section-title">আমাদের ক্যাম্পেইন</h2>
+                                            <h2 class="bd-section-title">আমাদের কর্মসূচি</h2>
 
                                             <!-- Filter Buttons -->
                                             <div class="bd-filter-group">
                                                 <button type="button" class="bd-btn bd-btn-outline active" data-filter="all">
-                                                    সব ক্যাম্পেইন
+                                                    সব কর্মসূচি
                                                 </button>
                                                 <button type="button" class="bd-btn bd-btn-outline" data-filter="nationwide">
                                                     জাতীয় পর্যায়ে
@@ -669,7 +669,7 @@
                                             <div class="col-12">
                                             <div class="alert alert-info text-center py-4">
                                             <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                            <p class="mb-0">বর্তমানে কোন ক্যাম্পেইন নেই।</p>
+                                            <p class="mb-0">বর্তমানে কোন কর্মসূচি নেই।</p>
                                             </div>
                                             </div>
                                             @endforelse
@@ -678,7 +678,7 @@
                                             <!-- View All Button -->
                                             <div class="bd-center bd-mt-lg">
                                                 <a href="{{ route('frontend.campaigns.index') }}" class="bd-btn bd-btn-primary bd-btn-lg">
-                                                    সকল ক্যাম্পেইন দেখুন <i class="fas fa-arrow-right ms-1"></i>
+                                                    সকল কর্মসূচি দেখুন <i class="fas fa-arrow-right ms-1"></i>
                                                 </a>
                                             </div>
                                         </div>
@@ -747,8 +747,8 @@
                                                     <div class="badge">
                                                         <i class="far fa-newspaper me-1"></i> ৩০ এপ্রিল, ২০২৫
                                                     </div>
-                                                    <h4 class="title">সফল হল বৃক্ষরোপণ ক্যাম্পেইন</h4>
-                                                    <p class="meta">গত মাসে শুরু হওয়া বৃক্ষরোপণ ক্যাম্পেইনে ৫০,০০০ গাছ রোপণের লক্ষ্যমাত্রা অর্জন করা গেছে।</p>
+                                                    <h4 class="title">সফল হল বৃক্ষরোপণ কর্মসূচি</h4>
+                                                    <p class="meta">গত মাসে শুরু হওয়া বৃক্ষরোপণ কর্মসূচিে ৫০,০০০ গাছ রোপণের লক্ষ্যমাত্রা অর্জন করা গেছে।</p>
                                                 </div>
                                             </div>
                                         </div>
